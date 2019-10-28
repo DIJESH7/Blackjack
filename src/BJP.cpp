@@ -6,7 +6,7 @@
 	}
 	void BJP::set_player_name(string p_name)
 	{
-
+	      name = p_name;
 	}
 	int BJP::get_chips()
 	{
