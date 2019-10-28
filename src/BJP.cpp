@@ -2,7 +2,7 @@
 
 	string BJP::get_player_name()
 	{
-
+		return name;
 	}
 	void BJP::set_player_name(string p_name)
 	{
@@ -18,5 +18,3 @@
 	Hand BJP::currentHand(){
 
 	}
-
-
