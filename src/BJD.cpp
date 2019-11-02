@@ -1,5 +1,10 @@
 #include "../include/BJD.h"
 
+BJD::BJD()
+{
+    players.insert (std::pair<int, BJP>(0, BJP()));
+}
+
 bool BJD::check_win(BJP player)
 {
 

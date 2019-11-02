@@ -18,7 +18,7 @@ class BJD
 
 
     private:
-        map<int, vector<BJP>> players;
+        map<int, BJP> players;
         Hand& hand;
 
 };

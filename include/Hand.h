@@ -19,7 +19,7 @@ class Hand
         Card removeCard(Card C);
         void isSoftHand(Card C);
         bool aceInHand();
-
+        void addCard();
         //might not implement
         int getHardValue();
         int getSoftValue();

@@ -15,6 +15,12 @@ int BJP::get_chips()
 void BJP::set_chips(int chip){
 
 }
-Hand BJP::currentHand(){
+Hand BJP::currentHand()
+{
+    
+}
 
+Hand BJP::getHand()
+{
+    return hand;
 }
