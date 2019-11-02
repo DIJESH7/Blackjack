@@ -1,11 +1,11 @@
-#include "main_window.h"
+#include "../include/UI_Interface.h"
 #include <gtkmm.h>
 
 int main(int argc, char *argv[])
 {
     auto app = Gtk::Application::create(argc, argv);
 
-    Main_window win;
+    UI_Interface win;
 
     return app->run(win);
 

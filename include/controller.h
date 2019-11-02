@@ -1,4 +1,7 @@
+#pragma once
 #include <iostream>
+#include "controller.h"
+#include "BJD.h"
 
 
 class Controller

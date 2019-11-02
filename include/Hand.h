@@ -85,4 +85,3 @@ private:
     int count;
     int bet;
 };
-

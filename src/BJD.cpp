@@ -1,18 +1,23 @@
-#include "BJD.h"
+#include "../include/BJD.h"
 
-	bool BJD::check_win(BJP player)
-	{
+BJD::BJD()
+{
+    players.insert (std::pair<int, BJP>(0, BJP()));
+}
 
-	}
-	void BJD::deal_cards(BJP player)
-	{
+bool BJD::check_win(BJP player)
+{
 
-	}	
-	Hand BJD::current_hand_dealer()
-	{
+}
+void BJD::deal_cards(BJP player)
+{
 
-	}
-	void BJD::reveal()
-	{
+}	
+Hand BJD::current_hand_dealer()
+{
 
-	}
+}
+void BJD::reveal()
+{
+
+}
