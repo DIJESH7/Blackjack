@@ -23,7 +23,7 @@ void Card::display()
 
     const char * suitText[] = { "Spades", "Hearts", "Clubs", "Diamonds" };
 
-    cout << rankText[rank_] << " of " << suitText[suit_] << endl;
+    cout << rankText[Card::rank_] << " of " << suitText[Card::suit_] << endl;
 }
 
 void Card::setValue(int val)
@@ -33,12 +33,12 @@ void Card::setValue(int val)
 
 void Card::setRank(Rank rank)
 {
-    rank_ = rank;
+    Card::rank_ = rank;
 }
 
 void Card::setSuit(Suit suit)
 {
-    suit_ = suit;
+    Card::suit_ = suit;
 }
 
 int Card::getValue()
@@ -48,12 +48,12 @@ int Card::getValue()
 
 Rank Card::getRank()
 {
-    return rank_;
+    return Card::rank_;
 }
 
 Suit Card::getSuit()
 {
-    return suit_;
+    return Card::suit_;
 }
 
 

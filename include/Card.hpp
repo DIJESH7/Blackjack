@@ -28,17 +28,6 @@ class Card
         int value;
 };
 
-  Card()
-  {
-
-  }
-
-  Card(Rank rank, Suit suit)
-  {
-      rank_ = rank;
-      suit_ = suit;
-  }
-
   // prints the card info in a string
   void display() 
   {
