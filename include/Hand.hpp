@@ -16,25 +16,12 @@ public:
         count = 0;  // number of cards
     }
 
-    /*
-    Card getCard(Deck D)
-    {
-        Card result;
-        result = D.deal();
-        inHand.push_back(result);
-        handValue+=result.getValue();
-        //reduceHand(result);
-        count++;
-        return result;  
-    }
-    */
-
     void addToHand(Card C)
     {
         inHand.push_back(C);
         handValue+=C.getValue();
 
-        
+
         count++;
     }
 
@@ -80,9 +67,22 @@ public:
         return result;
     }
 
+    void setBet(int b)
+    {
+        bet = b;
+    }
+
+    void doubleBet()
+    {
+        bet = bet*2;
+    }
+
+
+
 private:
     vector<Card>inHand;
     int handValue;
     int count;
+    int bet;
 };
 

@@ -40,7 +40,7 @@ public:
     void shuffle()
     {
         srand((unsigned) time(0));
-        for(int i = 0 ; i < 52 ; i++)
+        for(int i = 0 ; i < 312 ; i++)
         {
             swap( cards_[i] , cards_[ rand()%52] );
         }
