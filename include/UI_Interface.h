@@ -1,22 +1,28 @@
-#pragma once
+#ifndef UI_INTERFACE
+#define UI_INTERFACE
 
-#include "Hand.h"
-#include "controller.h"
 #include <gtkmm.h>
+#include <iostream>
 
-using namespace std;
 
 class UI_Interface : public Gtk::Window
 {
     public:
-        UI_Interface(Controller c);
-        void hit_button_pressed();
-        void stand_button_pressed();
-        void doubleDown_button_pressed();
-        void split_button_pressed();
-        void exit_button_pressed();
+    UI_Interface();
+    virtual ~UI_Interface();
+    void on_button_clicked(int x, int y, Gtk::Button* button);
+    void on_new_clicked();
+    // void rotateBoard();
+    // void onLoadClicked();
+    // void onSaveClicked();
 
     private:
-        Controller _controller;
-
+    Gtk::Statusbar* statusbar;
+    Gtk::Label* label;
+    std::vector<Gtk::Button*> buttons;
+    Gtk::VBox* vbox;
+    Gtk::Grid *grid;
+    Gtk::MenuBar *menubar;
 };
+
+#endif

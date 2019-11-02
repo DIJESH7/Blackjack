@@ -6,13 +6,13 @@
 class Controller
 {
     private:
-        Dealer _dealer;
+        BJD _dealer;
 
     public:
-        Controller();
+        Controller(BJD dealer) : _dealer(dealer) {}
         virtual ~Controller();
         void hit();
         void stand();
         void doubleDown();
         void split();
-}
+};
