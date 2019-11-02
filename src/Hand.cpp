@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "Hand.h"
+#include "../include/Hand.h"
 
 using namespace std;
 
@@ -29,15 +29,15 @@ int Hand::getTotalValue()
 {
     return handValue;
     /*
-    int hard = getHardValue();
-    int soft = getSoftValue();
-    if (hard > soft && hard <= 21)
-        return hard;
-    else if (soft > hard && soft <= 21)
-        return soft;
-    else
-        return hard;
-        */
+       int hard = getHardValue();
+       int soft = getSoftValue();
+       if (hard > soft && hard <= 21)
+       return hard;
+       else if (soft > hard && soft <= 21)
+       return soft;
+       else
+       return hard;
+       */
 }
 
 bool Hand::isBust()

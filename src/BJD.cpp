@@ -1,4 +1,4 @@
-#include "BJD.h"
+#include "../include/BJD.h"
 
 bool BJD::check_win(BJP player)
 {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "controller.h"
-#include "dealer.h"
+#include "BJD.h"
 
 class Controller
 {

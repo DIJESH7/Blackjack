@@ -1,13 +1,13 @@
 #include <iostream>
 //#include <string>
 
-#include "Card.h"
+#include "../include/Card.h"
 
 using namespace std;
 
 Card::Card()
 {
-    
+
 }
 
 Card::Card(Rank rank, Suit suit)
@@ -22,38 +22,38 @@ void Card::display()
     const char * rankText[] = { " ", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King" };
 
     const char * suitText[] = { "Spades", "Hearts", "Clubs", "Diamonds" };
-    
+
     cout << rankText[rank_] << " of " << suitText[suit_] << endl;
 }
 
 void Card::setValue(int val)
 {
-   value = val;
+    value = val;
 }
 
 void Card::setRank(Rank rank)
 {
-   rank_ = rank;
+    rank_ = rank;
 }
 
 void Card::setSuit(Suit suit)
 {
-   suit_ = suit;
+    suit_ = suit;
 }
 
 int Card::getValue()
 {
-   return value;
+    return value;
 }
 
 Rank Card::getRank()
 {
-   return rank_;
+    return rank_;
 }
 
 Suit Card::getSuit()
 {
-   return suit_;
+    return suit_;
 }
 
 

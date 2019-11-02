@@ -4,13 +4,13 @@
 #include <algorithm>
 #include <vector>
 
-#include "Deck.h"
+#include "../include/Deck.h"
 
 using namespace std;
 
 Deck::Deck()
 {
-   build();
+    build();
 }
 
 
@@ -62,47 +62,47 @@ Card Deck::deal()
 
 /*
 
-void Deck::build2()
+   void Deck::build2()
+   {
+// helps iterate 312 indexes
+currCard = 0; 
+
+// create 312 cards
+for(int d = 0 ; d < 6 ; d++)
 {
-    // helps iterate 312 indexes
-    currCard = 0; 
-    
-    // create 312 cards
-    for(int d = 0 ; d < 6 ; d++)
-    {
-        // make 52 cards with a Rank and Suit
-        for (int suitCounter = Spades; suitCounter < 4; suitCounter++)
-        {
-            for (int rankCounter = Ace; rankCounter <= 13; rankCounter++)
-            {   
-                cards[currCard].setRank(static_cast<Rank>(rankCounter));
-                cards[currCard].setSuit(static_cast<Suit>(suitCounter));
+// make 52 cards with a Rank and Suit
+for (int suitCounter = Spades; suitCounter < 4; suitCounter++)
+{
+for (int rankCounter = Ace; rankCounter <= 13; rankCounter++)
+{   
+cards[currCard].setRank(static_cast<Rank>(rankCounter));
+cards[currCard].setSuit(static_cast<Suit>(suitCounter));
 
-                    //cards[currCard].display(); // for deck checking
+//cards[currCard].display(); // for deck checking
 
-                currCard++;
-            }
-        }
-    }
+currCard++;
+}
+}
+}
 }
 
 void Deck::shuffle2()
 {
-    random_shuffle(std::begin(cards), std::end(cards));
-  
-    //for (int currCard = 51; 0 <= currCard; currCard--)
-    for (int currCard = 311; 0 <= currCard; currCard--)
-    {
-            //cards[currCard].display(); // for deck checking
-    }
+random_shuffle(std::begin(cards), std::end(cards));
+
+//for (int currCard = 51; 0 <= currCard; currCard--)
+for (int currCard = 311; 0 <= currCard; currCard--)
+{
+//cards[currCard].display(); // for deck checking
+}
 }
 
 Card Deck::deal2()
 {
-    // TODO throw error if deck is empty
-    
-	currCard--;
-	return cards[currCard];
+// TODO throw error if deck is empty
+
+currCard--;
+return cards[currCard];
 }
 
 

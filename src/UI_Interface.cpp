@@ -1,4 +1,4 @@
-#include "UI_Interface.h"
+#include "../include/UI_Interface.h"
 
 UI_Interface::UI_Interface(Controller controller)
 {
@@ -35,7 +35,7 @@ UI_Interface::UI_Interface(Controller controller)
     statusbar->set_center_widget(*label);
     vbox->add(*statusbar);
     vbox->show_all();
-    
+
 }
 
 void UI_Interface::hit_button_pressed()
@@ -56,5 +56,5 @@ void UI_Interface::split_button_pressed()
 }
 void UI_Interface::exit_button_pressed()
 {
-	
+
 }
