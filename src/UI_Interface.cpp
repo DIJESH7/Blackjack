@@ -43,7 +43,7 @@ UI_Interface::UI_Interface()
     
         	//Gtk::Button *button = Gtk::manage(new Gtk::Button());
 
-    		std::string tile_image = "images/cards/2_of_spades.png";
+    		std::string tile_image = "../images/cards/2s.jpg";
 
     		Gtk::Button *hit_button = Gtk::manage(new Gtk::Button("HIT"));
     		Gtk::Button *stand_button = Gtk::manage(new Gtk::Button("STAND"));
