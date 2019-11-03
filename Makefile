@@ -2,13 +2,13 @@ CXX = g++
 CXXFLAGS = --std=c++11
 GTKFLAGS = `/usr/bin/pkg-config gtkmm-3.0 --cflags --libs`
 
-blackjack: main.o ui_interface.o controller.o BJD.o BJP.o
-	$(CXX) $(CXXFLAGS) -o blackjack main.o ui_interface.o controller.o BJD.o BJP.o $(GTKFLAGS) -g
+blackjack: main.o UI_Interface.o controller.o BJD.o BJP.o
+	$(CXX) $(CXXFLAGS) -o blackjack main.o UI_Interface.o controller.o BJD.o BJP.o $(GTKFLAGS) -g
 
 main.o : src/main.cpp include/*.h
 	$(CXX) $(CXXFLAGS) -c src/main.cpp $(GTKFLAGS) -g -Wall
 
-ui_interface.o : src/UI_Interface.cpp include*.h
+UI_Interface.o : src/UI_Interface.cpp include/*.h
 	$(CXX) $(CXXFLAGS) -c src/UI_Interface.cpp $(GTKFLAGS) -g -Wall
 
 controller.o : src/controller.cpp include/*.h

@@ -1,6 +1,9 @@
 #include "../include/controller.h"
 
-Controller::Controller() : _dealer{Dealer dealer} {}
+Controller::Controller()
+{
+    
+}
 
 Controller::~Controller() {}
 

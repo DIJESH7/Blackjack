@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include "Hand.h"
 #include "BJP.h"
 
@@ -19,6 +20,6 @@ class BJD
 
     private:
         map<int, BJP> players;
-        Hand& hand;
+        Hand hand;
 
 };

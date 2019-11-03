@@ -1,5 +1,10 @@
 #include "../include/BJP.h"
 
+BJP::BJP()
+{
+    
+}
+
 string BJP::get_player_name()
 {
     return name;
