@@ -13,201 +13,208 @@
 #include <iostream>
 #include <thread>
 #include "asio.hpp"
-#include "chat_message.hpp"
-#include "Card.hpp"
-#include "Hand.hpp"
+#include "../include/chat_message.hpp"
+#include "../include/Card.hpp"
+#include "../include/Hand.hpp"
 
 #include <cstdlib>
-
+#include "../include/UI_Interface.h"
+#include <gtkmm.h>
 using asio::ip::tcp;
 
 typedef std::deque<chat_message> chat_message_queue;
 
 class chat_client
 {
-public:
-  chat_client(asio::io_context& io_context,
-      const tcp::resolver::results_type& endpoints)
-    : io_context_(io_context),
-      socket_(io_context)
-  {
-    do_connect(endpoints);
-  }
+    public:
+        chat_client(asio::io_context& io_context,
+                const tcp::resolver::results_type& endpoints)
+            : io_context_(io_context),
+            socket_(io_context)
+    {
+        do_connect(endpoints);
+    }
 
-  void write(const chat_message& msg)
-  {
-    asio::post(io_context_,
-        [this, msg]()
+        void write(const chat_message& msg)
         {
-          bool write_in_progress = !write_msgs_.empty();
-          write_msgs_.push_back(msg);
-          if (!write_in_progress)
-          {
-            do_write();
-          }
-        });
-  }
+            asio::post(io_context_,
+                    [this, msg]()
+                    {
+                    bool write_in_progress = !write_msgs_.empty();
+                    write_msgs_.push_back(msg);
+                    if (!write_in_progress)
+                    {
+                    do_write();
+                    }
+                    });
+        }
 
-  void close()
-  {
-    asio::post(io_context_, [this]() { socket_.close(); });
-  }
-
-  void register_client()
-  {
-    //  ask name
-    // all clients have 7
-    std::cout << "\n\nWELCOME TO CASINO ROYALE!" << std::endl;
-
-    id = rand() % 50;
-    std::cout << "given player id:" << id << std::endl;
-  }
-
-  int get_id()
-  {
-    return id;
-  }
-
-  void set_bet()
-  {
-
-  }
-
-private:
-  void do_connect(const tcp::resolver::results_type& endpoints)
-  {
-    asio::async_connect(socket_, endpoints,
-        [this](std::error_code ec, tcp::endpoint)
+        void close()
         {
-          if (!ec)
-          {
-            register_client();
-            do_read_header();
-          }
-        });
-  }
+            asio::post(io_context_, [this]() { socket_.close(); });
+        }
 
-  void do_read_header()
-  {
-    asio::async_read(socket_,
-        asio::buffer(read_msg_.data(), chat_message::header_length),
-        [this](std::error_code ec, std::size_t /*length*/)
+        void register_client()
         {
-          if (!ec && read_msg_.decode_header())
-          {
-            do_read_body();
-          }
-          else
-          {
-            socket_.close();
-          }
-        });
-  }
+            //  ask name
+            // all clients have 7
+            std::cout << "\n\nWELCOME TO CASINO ROYALE!" << std::endl;
 
-  void do_read_body()
-  {
-    asio::async_read(socket_,
-        asio::buffer(read_msg_.body(), read_msg_.body_length()),
-        [this](std::error_code ec, std::size_t /*length*/)
+            id = rand() % 50;
+            std::cout << "given player id:" << id << std::endl;
+        }
+
+        int get_id()
         {
-          if (!ec)
-          {
-            std::cout.write(read_msg_.body(), read_msg_.body_length());
-            std::cout << "\n";
-            do_read_header();
-          }
-          else
-          {
-            socket_.close();
-          }
-        });
-  }
+            return id;
+        }
 
-  void do_write()
-  {
-    asio::async_write(socket_,
-        asio::buffer(write_msgs_.front().data(),
-          write_msgs_.front().length()),
-        [this](std::error_code ec, std::size_t /*length*/)
+        void set_bet()
         {
-          if (!ec)
-          {
-            write_msgs_.pop_front();
-            if (!write_msgs_.empty())
-            {
-              do_write();
-            }
-          }
-          else
-          {
-            socket_.close();
-          }
-        });
-  }
 
-  void hit()
-  {
-    Card temp;
-    //get card from controller
+        }
 
-    temp = shoe.getCard();
-    inHand.addToHand(temp);
-  }
+    private:
+        void do_connect(const tcp::resolver::results_type& endpoints)
+        {
+            asio::async_connect(socket_, endpoints,
+                    [this](std::error_code ec, tcp::endpoint)
+                    {
+                    if (!ec)
+                    {
+                    register_client();
+                    do_read_header();
+                    }
+                    });
+        }
 
-private:
-  asio::io_context& io_context_;
-  tcp::socket socket_;
-  chat_message read_msg_;
-  chat_message_queue write_msgs_;
+        void do_read_header()
+        {
+            asio::async_read(socket_,
+                    asio::buffer(read_msg_.data(), chat_message::header_length),
+                    [this](std::error_code ec, std::size_t /*length*/)
+                    {
+                    if (!ec && read_msg_.decode_header())
+                    {
+                    do_read_body();
+                    }
+                    else
+                    {
+                    socket_.close();
+                    }
+                    });
+        }
+
+        void do_read_body()
+        {
+            asio::async_read(socket_,
+                    asio::buffer(read_msg_.body(), read_msg_.body_length()),
+                    [this](std::error_code ec, std::size_t /*length*/)
+                    {
+                    if (!ec)
+                    {
+                    std::cout.write(read_msg_.body(), read_msg_.body_length());
+                    std::cout << "\n";
+                    do_read_header();
+                    }
+                    else
+                    {
+                    socket_.close();
+                    }
+                    });
+        }
+
+        void do_write()
+        {
+            asio::async_write(socket_,
+                    asio::buffer(write_msgs_.front().data(),
+                        write_msgs_.front().length()),
+                    [this](std::error_code ec, std::size_t /*length*/)
+                    {
+                    if (!ec)
+                    {
+                    write_msgs_.pop_front();
+                    if (!write_msgs_.empty())
+                    {
+                    do_write();
+                    }
+                    }
+                    else
+                    {
+                    socket_.close();
+                    }
+                    });
+        }
+
+        void hit()
+        {
+            Card temp;
+            //get card from controller
+
+            temp = inHand.getCard();
+            inHand.addToHand(temp);
+        }
+
+    private:
+        asio::io_context& io_context_;
+        tcp::socket socket_;
+        chat_message read_msg_;
+        chat_message_queue write_msgs_;
 
 
-  Hand inHand;
-  string name;
-  int id = 0;
+        Hand inHand;
+        string name;
+        int id = 0;
 };
 
 int main(int argc, char* argv[])
 {
-  try
-  {
-    if (argc != 3)
+    try
     {
-      std::cerr << "Usage: chat_client <host> <port>\n";
-      return 1;
+        if (argc != 3)
+        {
+            std::cerr << "Usage: chat_client <host> <port>\n";
+            return 1;
+        }
+
+        asio::io_context io_context;
+
+        tcp::resolver resolver(io_context);
+        auto endpoints = resolver.resolve(argv[1], argv[2]);
+        chat_client c(io_context, endpoints);
+
+        std::thread t([&io_context](){ io_context.run(); });
+
+        char line[chat_message::max_body_length + 1];
+        char cardInfo[chat_message::max_body_length + 1];
+        char playInfo[chat_message::max_body_length + 1];
+
+
+
+        while (std::cin.getline(line, chat_message::max_body_length + 1))
+        {
+
+            chat_message msg;
+
+            msg.body_length(std::strlen(line)); // sets body_length to math input length.
+            std::memcpy(msg.body(), line, msg.body_length()); // takes body_length of input, to data[] at 4th index
+            msg.encode_header();
+            c.write(msg);
+        }
+
+        c.close();
+        t.join();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Exception: " << e.what() << "\n";
     }
 
-    asio::io_context io_context;
+    auto app = Gtk::Application::create(argc, argv);
 
-    tcp::resolver resolver(io_context);
-    auto endpoints = resolver.resolve(argv[1], argv[2]);
-    chat_client c(io_context, endpoints);
+    UI_Interface win;
 
-    std::thread t([&io_context](){ io_context.run(); });
+    return app->run(win);
 
-    char line[chat_message::max_body_length + 1];
-    char cardInfo[chat_message::max_body_length + 1];
-    char playInfo[chat_message::max_body_length + 1];
-    
-
-
-    while (std::cin.getline(line, chat_message::max_body_length + 1))
-    {
-
-      chat_message msg;
-
-      msg.body_length(std::strlen(line)); // sets body_length to math input length.
-      std::memcpy(msg.body(), line, msg.body_length()); // takes body_length of input, to data[] at 4th index
-      msg.encode_header();
-      c.write(msg);
-    }
-
-    c.close();
-    t.join();
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << "Exception: " << e.what() << "\n";
-  }
-
-  return 0;
+    //return 0;
 }

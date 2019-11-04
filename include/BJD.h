@@ -1,6 +1,6 @@
 #pragma once
 #include <map>
-#include "Hand.h"
+#include "Hand.hpp"
 #include "BJP.h"
 
 #define cardsTotalLimit 21

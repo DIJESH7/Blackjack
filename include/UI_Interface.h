@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Hand.h"
+#include "Hand.hpp"
 #include "controller.h"
 #include <gtkmm.h>
 

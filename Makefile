@@ -1,12 +1,19 @@
-CXX = g++
 CXXFLAGS = --std=c++11
-GTKFLAGS = `/usr/bin/pkg-config gtkmm-3.0 --cflags --libs`
+GTKFLAGS = $(shell pkg-config gtkmm-3.0 --cflags --libs)
+CPPFLAGS = -I./asio-1.13.0/include
 
-blackjack: main.o UI_Interface.o controller.o BJD.o BJP.o
-	$(CXX) $(CXXFLAGS) -o blackjack main.o UI_Interface.o controller.o BJD.o BJP.o $(GTKFLAGS) -g
+TARGETS = server client 
 
-main.o : src/main.cpp include/*.h
-	$(CXX) $(CXXFLAGS) -c src/main.cpp $(GTKFLAGS) -g -Wall
+all:$(TARGETS) 
+
+server: src/chat_server.cpp include/chat_message.hpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $< -lpthread -g -Wall
+
+client: UI_Interface.o controller.o BJD.o BJP.o chat_client.o
+	$(CXX) $(CXXFLAGS) -o client UI_Interface.o controller.o BJD.o BJP.o chat_client.o $(GTKFLAGS) -g -Wall
+
+chat_client.o : src/chat_client.cpp include/chat_message.hpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -lpthread $(GTKFLAGS) -g -Wall 
 
 UI_Interface.o : src/UI_Interface.cpp include/*.h
 	$(CXX) $(CXXFLAGS) -c src/UI_Interface.cpp $(GTKFLAGS) -g -Wall
@@ -21,4 +28,4 @@ BJP.o : src/BJP.cpp include/*.h
 	$(CXX) $(CXXFLAGS) -c src/BJP.cpp $(GTKFLAGS) -g -Wall
 
 clean:
-	-rm -f *.o *.gch *~ blackjack
+	-rm -f *.o *.gch *~ $(TARGETS)
