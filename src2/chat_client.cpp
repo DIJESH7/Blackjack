@@ -70,7 +70,7 @@ public:
   {
     //  ask name
     // all clients have 7
-    std::cout << "\n\nWELCOME TO CASINO ROYALE!" << std::endl;
+    std::cout << "WELCOME TO CASINO ROYALE!" << std::endl;
 
     id = rand() % 50;
     std::cout << "given player id:" << id << std::endl;
@@ -121,6 +121,7 @@ private:
         {
           if (!ec)
           {
+            // getting card
             std::cout << " getting card:" << read_msg_.card.value << std::endl;
             h.addCard(read_msg_.card);
             std::cout.write(read_msg_.body(), read_msg_.body_length());
@@ -178,7 +179,7 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    asio::io_context io_context; std::cout << "Play" << std::endl;
+    asio::io_context io_context;
 
     tcp::resolver resolver(io_context);
     auto endpoints = resolver.resolve(argv[1], argv[2]);
@@ -187,22 +188,62 @@ int main(int argc, char* argv[])
     std::thread t([&io_context](){ io_context.run(); });
 
     char line[chat_message::max_body_length + 1];
-    while(std::cin.getline(line, chat_message::max_body_length + 1))
+
+    
+    //while(std::cin.getline(line, chat_message::max_body_length + 1))
+    while(true)
     {
       chat_message msg;
+      msg.ca.client_credits = 100;
       
       msg.body_length(std::strlen(line));
       std::memcpy(msg.body(), line, msg.body_length());
 
       // testing
-      std::cout << "Starting round." << std::endl;
-      // hitting 1 card
-      msg.ca.hit = true;
-      msg.encode_header(); // write hit
-      c.write(msg);       // send hit
-      // hitting 1 card
-      msg.encode_header(); // write hit
-      c.write(msg);       // send hit
+      std::cout << "Play? y/n" << std::endl;
+      char ans;
+      std::cin >> ans;
+      if (ans == 'y')
+      {
+        msg.ca.play = true;
+        std::cout << "Bet amount? [max 3, min 1]" << std::endl;
+        int amount;
+        //TODO check for min and max input
+        std::cin >> amount;
+        msg.ca.bet = amount;
+        Card temp;
+
+        //deal first card
+        msg.ca.first_card = true;
+        msg.ca.second_card = false;
+        msg.encode_header();
+        c.write(msg);
+
+
+        //deal second card
+        msg.ca.first_card = false;
+        msg.ca.second_card = true;
+        msg.encode_header();
+        c.write(msg);
+
+        /*
+
+  
+
+
+
+        std::cout << "Starting round." << std::endl;
+        // hitting 1 card
+        msg.ca.hit = true;
+        msg.encode_header(); // write hit
+        c.write(msg);       // send hit
+        // hitting 1 card
+        msg.encode_header(); // write hit
+        c.write(msg);       // send hit
+        */
+      }
+
+      
 
 
     }

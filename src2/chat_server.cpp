@@ -146,6 +146,23 @@ private:
         {
           if (!ec && read_msg_.decode_header()) 
           {
+            // if player plays, deal first card
+            if(read_msg_.ca.play == true && read_msg_.ca.first_card == true)
+            {
+              Card temp = d.getCard();
+              read_msg_.card = temp; std::cout << "dealing card:" << temp.value << std::endl;
+              temp = d.getCard(); std::cout << "taking card:" << temp.value << std::endl;
+              h.addCard(temp);
+            }
+            // if player already has first card, deal second
+            if(read_msg_.ca.play == true && read_msg_.ca.second_card == true)
+            {
+              Card temp = d.getCard();
+              read_msg_.card = temp; std::cout << "dealing card:" << temp.value << std::endl;
+              temp = d.getCard(); std::cout << "taking card:" << temp.value << std::endl;
+              h.addCard(temp);
+            }
+
           	// if player wants to hit
             if( read_msg_.ca.hit == true)
             {

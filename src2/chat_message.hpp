@@ -23,7 +23,7 @@ class game_state
 {
   public:
   bool valid;
-  int dealer_points;
+  int dealer_credits;
   int something[3];
   // note you can't use std::string 
   // or pointers
@@ -38,8 +38,14 @@ class client_action
   bool doubledown;
   bool split;
   bool surrender;
+  bool insurance;
   bool play;
-  char C[5];
+  bool first_card;
+  bool second_card;
+  int id[5];
+  int client_credits;
+  int bet;
+  //char C[5];
 };
 
 
