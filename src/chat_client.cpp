@@ -14,7 +14,7 @@
 #include <thread>
 #include "asio.hpp"
 #include "../include/chat_message.hpp"
-#include "../inlucde/Hand.hpp"
+#include "../include/Hand.hpp"
 
 #include <cstdlib>
 
