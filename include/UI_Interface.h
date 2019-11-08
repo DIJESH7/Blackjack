@@ -18,9 +18,10 @@ class UI_Interface : public Gtk::Window
         void exit_button_pressed();
         void on_button_clicked();
         void on_new_clicked();
+        void set_id(int id);
 
     private:
-    Controller _controller;
+    int id;
     Gtk::Statusbar* statusbar;
     Gtk::Label* label;
     std::vector<Gtk::Button*> buttons;

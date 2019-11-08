@@ -1,13 +1,4 @@
-//
-// chat_client.cpp
-// ~~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2019 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-
+#pragma once
 #include <cstdlib>
 #include <deque>
 #include <iostream>
@@ -17,7 +8,6 @@
 #include "../include/Hand.hpp"
 #include "../include/UI_Interface.h"
 #include <cstdlib>
-//#include "../include/client.h"
 
 using asio::ip::tcp;
 
@@ -26,9 +16,15 @@ using asio::ip::tcp;
 
 typedef std::deque<chat_message> chat_message_queue;
 
+
+
+//------------------------------------------------------------------------------------------------
+
+
 Hand h;
 
 //------------------------------------------------------------------------------------------------
+
 
 class chat_client
 {
@@ -162,60 +158,29 @@ class chat_client
         int id = 0;
 };
 
+extern chat_client* c;
 
-
-int main(int argc, char* argv[])
+class Connector
 {
+    public:
+        Connector() {}
 
-    auto app = Gtk::Application::create("");
-    //gtk_init( &argc, &argv);
-    UI_Interface win; 
-    if (argc != 3)
-    {
-        std::cerr << "Usage: chat_client <host> <port>\n";
-        return 1;
-    }
+        static void hit(int id)
+        {
+            char line[chat_message::max_body_length + 1];
+            chat_message msg;
 
-    asio::io_context io_context; 
-    std::cout << "Play" << std::endl;
+            msg.body_length(std::strlen(line));
+            std::memcpy(msg.body(), line, msg.body_length());
 
-    tcp::resolver resolver(io_context);
-    auto endpoints = resolver.resolve(argv[1], argv[2]);
-    chat_client c(io_context, endpoints);
-
-    std::thread t([&io_context](){ io_context.run(); });
-    //TODO add lambda app->run in a std thread
-    std::thread t2([&](){ app->run(win); });
-    std::cout << "Got here\nll\n" << std::endl;
-    //gtk_main();
-    //app->run(win);
-    char line[chat_message::max_body_length + 1];
-
-    //while(std::cin.getline(line, chat_message::max_body_length + 1))
-    //{
-    //    chat_message msg;
-
-    //    msg.body_length(std::strlen(line));
-    //    std::memcpy(msg.body(), line, msg.body_length());
-
-    //    // testing
-    //    std::cout << "Starting round." << std::endl;
-    //    // hitting 1 card
-    //    msg.ca.hit = true;
-    //    msg.encode_header(); // write hit
-    //    c.write(msg);       // send hit
-    //    // hitting 1 card
-    //    msg.encode_header(); // write hit
-    //    c.write(msg);       // send hit
-    //}
-
-    c.close();
-    t.join();
-
-    //catch (std::exception& e)
-    //{
-    //  std::cerr << "Exception: " << e.what() << "\n";
-    //}
-
-    return 0;
-}
+            // testing
+            std::cout << "Starting round." << std::endl;
+            // hitting 1 card
+            msg.ca.hit = true;
+            msg.encode_header(); // write hit
+            c->write(msg);       // send hit
+            // hitting 1 card
+            msg.encode_header(); // write hit
+            c->write(msg);       // send hit
+        }
+};
