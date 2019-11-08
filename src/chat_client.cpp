@@ -16,8 +16,7 @@
 #include "../include/chat_message.hpp"
 #include "../include/Hand.hpp"
 #include "../include/UI_Interface.h"
-#include <cstdlib>
-//#include "../include/client.h"
+#include "../include/controller.h"
 
 using asio::ip::tcp;
 
@@ -130,6 +129,7 @@ class chat_client
 
         void do_write()
         {
+            cout << "got called\n";
             asio::async_write(socket_,
                     asio::buffer(write_msgs_.front().data(),
                         write_msgs_.front().length()),
@@ -150,8 +150,6 @@ class chat_client
                     });
         }
 
-
-
     private:
         asio::io_context& io_context_;
         tcp::socket socket_;
@@ -162,14 +160,40 @@ class chat_client
         int id = 0;
 };
 
+chat_client* c;
 
+
+Controller::Controller()
+{
+    //Controller::_client = client;
+}
+
+void Controller::hit()
+{
+    char line[chat_message::max_body_length + 1];
+    //std::strcpy(line, "garbage");
+    chat_message msg;
+
+    msg.body_length(std::strlen(line));
+    std::memcpy(msg.body(), line, msg.body_length());
+
+    // testing
+    std::cout << "Starting round." << std::endl;
+    // hitting 1 card
+    msg.ca.hit = true;
+    msg.encode_header(); // write hit
+    c->write(msg);       // send hit
+    // hitting 1 card
+    msg.encode_header(); // write hit
+    c->write(msg);       // send hit
+    std::cout << "controller c:" << c << std::endl;
+}
 
 int main(int argc, char* argv[])
 {
 
     auto app = Gtk::Application::create("");
     //gtk_init( &argc, &argv);
-    UI_Interface win; 
     if (argc != 3)
     {
         std::cerr << "Usage: chat_client <host> <port>\n";
@@ -181,35 +205,42 @@ int main(int argc, char* argv[])
 
     tcp::resolver resolver(io_context);
     auto endpoints = resolver.resolve(argv[1], argv[2]);
-    chat_client c(io_context, endpoints);
+    c = new chat_client(io_context, endpoints);
+    std::cout << "c:" << c << std::endl;
+    Controller* controller = new Controller();
+    UI_Interface win(controller); 
 
     std::thread t([&io_context](){ io_context.run(); });
     //TODO add lambda app->run in a std thread
     std::thread t2([&](){ app->run(win); });
-    std::cout << "Got here\nll\n" << std::endl;
+    std::cout << "Got here\n" << std::endl;
     //gtk_main();
     //app->run(win);
     char line[chat_message::max_body_length + 1];
 
+    //std::cin.getline(line, chat_message::max_body_length + 1);
+    cout << line;
     //while(std::cin.getline(line, chat_message::max_body_length + 1))
-    //{
-    //    chat_message msg;
+    {
+        //cout << "Called\n";
+        //chat_message msg;
 
-    //    msg.body_length(std::strlen(line));
-    //    std::memcpy(msg.body(), line, msg.body_length());
+        //msg.body_length(std::strlen(line));
+        //std::memcpy(msg.body(), line, msg.body_length());
 
-    //    // testing
-    //    std::cout << "Starting round." << std::endl;
-    //    // hitting 1 card
-    //    msg.ca.hit = true;
-    //    msg.encode_header(); // write hit
-    //    c.write(msg);       // send hit
-    //    // hitting 1 card
-    //    msg.encode_header(); // write hit
-    //    c.write(msg);       // send hit
-    //}
+        //// testing
+        //std::cout << "Starting round." << std::endl;
+        //// hitting 1 card
+        //msg.ca.hit = true;
+        //msg.encode_header(); // write hit
+        //c->write(msg);       // send hit
+        //// hitting 1 card
+        //msg.encode_header(); // write hit
+        //c->write(msg);       // send hit
+    }
 
-    c.close();
+    t2.join();
+    c->close();
     t.join();
 
     //catch (std::exception& e)

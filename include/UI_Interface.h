@@ -9,7 +9,7 @@ using namespace std;
 class UI_Interface : public Gtk::Window
 {
     public:
-        UI_Interface();
+        UI_Interface(Controller* controller);
         ~UI_Interface();
         void hit_button_pressed();
         void stand_button_pressed();
@@ -28,5 +28,6 @@ class UI_Interface : public Gtk::Window
     Gtk::VBox* vbox;
     Gtk::Grid *grid;
     Gtk::MenuBar *menubar;
+    Controller* controller;
 
 };

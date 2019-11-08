@@ -1,10 +1,11 @@
 #include "../include/UI_Interface.h"
-//#include "../include/client.h"
 #include <gtkmm.h>
 #include <string>
 
-UI_Interface::UI_Interface()
+UI_Interface::UI_Interface(Controller* controller)
 {
+    UI_Interface::controller = controller;
+
     set_default_size(700, 700);
     set_title("BJ");
 
@@ -164,5 +165,5 @@ void UI_Interface::set_id(int id)
 
 void UI_Interface::hit_button_pressed()
 {
-    //Connector::hit(UI_Interface::id);
+    UI_Interface::controller->hit();
 }
