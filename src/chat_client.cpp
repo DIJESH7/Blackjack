@@ -64,11 +64,9 @@ class chat_client
         {
             //  ask name
             // all clients have 7
-            std::cout << "\n\nWELCOME TO CASINO ROYALE!" << std::endl;
             srand((unsigned) time(0));
             id = rand() % 50;
             return id;
-            std::cout << "given player id:" << id << std::endl;
         }
 
         int get_id()
@@ -84,7 +82,9 @@ class chat_client
                     {
                     if (!ec)
                     {
+                    std::cout << "\n\nWELCOME TO CASINO ROYALE!" << std::endl;
                     std::cout << "New Player connected with Player ID "<< register_client() << std::endl;
+                    std::cout << "Your Player id:"<< id << std::endl;
                     do_read_header();
                     }
                     });
@@ -99,7 +99,6 @@ class chat_client
                     if (!ec && read_msg_.decode_header())
                     {
                     //system("clear");
-                    std::cout << "Your Player id:"<< id << std::endl;
                     std::cout << std::endl;
                     std::cout << read_msg_.ca.g << std::endl;
                     do_read_body();
@@ -134,7 +133,6 @@ class chat_client
 
         void do_write()
         {
-            cout << "got called\n";
             asio::async_write(socket_,
                     asio::buffer(write_msgs_.front().data(),
                         write_msgs_.front().length()),
@@ -182,16 +180,10 @@ void Controller::hit()
     msg.body_length(std::strlen(line));
     std::memcpy(msg.body(), line, msg.body_length());
 
-    // testing
-    std::cout << "Starting round." << std::endl;
     // hitting 1 card
     msg.ca.hit = true;
     msg.encode_header(); // write hit
     c->write(msg);       // send hit
-    // hitting 1 card
-    msg.encode_header(); // write hit
-    c->write(msg);       // send hit
-    std::cout << "controller c:" << c << std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -211,7 +203,6 @@ int main(int argc, char* argv[])
     tcp::resolver resolver(io_context);
     auto endpoints = resolver.resolve(argv[1], argv[2]);
     c = new chat_client(io_context, endpoints);
-    std::cout << "c:" << c << std::endl;
     Controller* controller = new Controller();
     UI_Interface win(controller); 
 
@@ -219,6 +210,7 @@ int main(int argc, char* argv[])
     chat_message msg;
     msg.ca.client_credits = 100;
 
+    char line[chat_message::max_body_length + 1];
     msg.body_length(std::strlen(line));
     std::memcpy(msg.body(), line, msg.body_length());
 
@@ -239,31 +231,10 @@ int main(int argc, char* argv[])
         //start dealing
         msg.ca.play = true;
         msg.encode_header();
-        c.write(msg);
+        c->write(msg);
     }
 
     std::thread t2([&](){ app->run(win); });
-
-    char line[chat_message::max_body_length + 1];
-
-    //while(std::cin.getline(line, chat_message::max_body_length + 1))
-    {
-        //cout << "Called\n";
-        //chat_message msg;
-
-        //msg.body_length(std::strlen(line));
-        //std::memcpy(msg.body(), line, msg.body_length());
-
-        //// testing
-        //std::cout << "Starting round." << std::endl;
-        //// hitting 1 card
-        //msg.ca.hit = true;
-        //msg.encode_header(); // write hit
-        //c->write(msg);       // send hit
-        //// hitting 1 card
-        //msg.encode_header(); // write hit
-        //c->write(msg);       // send hit
-    }
 
     //main keeps waiting for gui to exit...
     //only after gui closes, we close client

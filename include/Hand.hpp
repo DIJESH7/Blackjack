@@ -4,6 +4,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <string>
 //#include <deque>
 #include "Card.hpp"
 
@@ -81,6 +82,23 @@ public:
         card.display();
       }
     }
+
+    std::string printAllHand(int id)
+    {
+        std::string result;
+        srand((unsigned) time(0));
+        //temporary id for testing
+        result += "<-- Player ";
+        result += to_string(id);
+        result += " hand:\n";
+
+        for(auto card: inHand)
+        {   
+            result += card.printCard(); // utsav caught this
+        }
+        return result;
+    }
+
     std::vector<Card>inHand;
     //deque<Card>inHand;
     int handValue;
