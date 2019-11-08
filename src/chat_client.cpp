@@ -60,13 +60,14 @@ class chat_client
             asio::post(io_context_, [this]() { socket_.close(); });
         }
 
-        void register_client()
+        int register_client()
         {
             //  ask name
             // all clients have 7
             std::cout << "\n\nWELCOME TO CASINO ROYALE!" << std::endl;
-
+            srand((unsigned) time(0));
             id = rand() % 50;
+            return id;
             std::cout << "given player id:" << id << std::endl;
         }
 
@@ -83,7 +84,7 @@ class chat_client
                     {
                     if (!ec)
                     {
-                    register_client();
+                    std::cout << "New Player connected with Player ID "<< register_client() << std::endl;
                     do_read_header();
                     }
                     });
@@ -97,6 +98,10 @@ class chat_client
                     {
                     if (!ec && read_msg_.decode_header())
                     {
+                    //system("clear");
+                    std::cout << "Your Player id:"<< id << std::endl;
+                    std::cout << std::endl;
+                    std::cout << read_msg_.ca.g << std::endl;
                     do_read_body();
                     }
                     else
@@ -114,10 +119,10 @@ class chat_client
                     {
                     if (!ec)
                     {
-                    std::cout << " getting card:" << read_msg_.card.value << std::endl;
-                    h.addCard(read_msg_.card);
-                    std::cout.write(read_msg_.body(), read_msg_.body_length());
-                    std::cout << "\n";
+                    //std::cout << " getting card:" << read_msg_.card.value << std::endl;
+                    //h.addCard(read_msg_.card);
+                    //std::cout.write(read_msg_.body(), read_msg_.body_length());
+                    //std::cout << "\n";
                     do_read_header();
                     }
                     else
@@ -157,7 +162,7 @@ class chat_client
         chat_message_queue write_msgs_;
 
         std::string name;
-        int id = 0;
+        int id;
 };
 
 chat_client* c;
@@ -165,7 +170,7 @@ chat_client* c;
 
 Controller::Controller()
 {
-    //Controller::_client = client;
+
 }
 
 void Controller::hit()
@@ -211,15 +216,36 @@ int main(int argc, char* argv[])
     UI_Interface win(controller); 
 
     std::thread t([&io_context](){ io_context.run(); });
-    //TODO add lambda app->run in a std thread
+    chat_message msg;
+    msg.ca.client_credits = 100;
+
+    msg.body_length(std::strlen(line));
+    std::memcpy(msg.body(), line, msg.body_length());
+
+    // testing
+    std::cout << "Play? y/n" << std::endl;
+    char ans;
+    std::cin >> ans;
+
+    if (ans == 'y')
+    {
+        std::cout << "Bet amount? [max 3, min 1]" << std::endl;
+        int amount;
+        //TODO check for min and max input
+        std::cin >> amount;
+        msg.ca.bet = amount;
+        Card temp;
+
+        //start dealing
+        msg.ca.play = true;
+        msg.encode_header();
+        c.write(msg);
+    }
+
     std::thread t2([&](){ app->run(win); });
-    std::cout << "Got here\n" << std::endl;
-    //gtk_main();
-    //app->run(win);
+
     char line[chat_message::max_body_length + 1];
 
-    //std::cin.getline(line, chat_message::max_body_length + 1);
-    cout << line;
     //while(std::cin.getline(line, chat_message::max_body_length + 1))
     {
         //cout << "Called\n";
@@ -239,6 +265,8 @@ int main(int argc, char* argv[])
         //c->write(msg);       // send hit
     }
 
+    //main keeps waiting for gui to exit...
+    //only after gui closes, we close client
     t2.join();
     c->close();
     t.join();

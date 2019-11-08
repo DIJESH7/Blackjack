@@ -15,10 +15,11 @@
 #include <memory>
 #include <set>
 #include <utility>
+#include <string>
 #include "asio.hpp"
-#include "../include/chat_message.hpp"
-#include "../include/Deck.hpp"
-#include "../include/Hand.hpp"
+#include "chat_message.hpp"
+#include "Deck.hpp"
+#include "Hand.hpp"
 
 
 
@@ -46,7 +47,22 @@ class chat_participant
 public:
   virtual ~chat_participant() {}
   virtual void deliver(const chat_message& msg) = 0;
-  int id = 0;
+
+  void pHand(Card t)
+  {
+  	playerHand.addCard(t);
+  }
+
+  std::string printHand()
+  {
+  	std::string result;
+  	result = playerHand.printAllHand();
+  	return result;
+  }
+
+ 
+  int id;
+  Hand playerHand;
 private:
  
   
@@ -56,15 +72,30 @@ typedef std::shared_ptr<chat_participant> chat_participant_ptr;
 
 //----------------------------------------------------------------------
 
+int playercount = 0;
+bool inplay = false;
+
 class chat_room
 {
 public:
 	// puts client in participants vector and sends past msg logs
   void join(chat_participant_ptr participant) 
   {
-    participants_.insert(participant);
-    for (auto msg: recent_msgs_)
-      participant->deliver(msg);
+  	participant->id = ++playercount;
+
+  	if(inplay || playercount > 6)
+  	{
+  		//tell them to wait
+  	}
+  	else
+  	{
+  		participants_.insert(participant);
+
+    	for (auto msg: recent_msgs_)
+      		participant->deliver(msg);
+  	}
+
+    
     
   }
 
@@ -81,7 +112,6 @@ public:
 
     for (auto participant: participants_)
         participant->deliver(msg);
-    
   }
 
   // TODO deliver msg to specific client
@@ -99,6 +129,36 @@ public:
   }
 
 
+  int sizeOfParticipants()
+  {
+  	int size = participants_.size();
+  	return size;
+  }
+
+  void giveCard() // for initial dealing
+  {
+  	for(auto participant: participants_)
+  	{	
+  		Card temp;
+       	temp = d.getCard();
+  		participant->pHand(temp);
+  	}
+  }
+
+
+
+  std::string stringOfCards() //string of every player's cards
+  {
+  	std::string result;
+  	for(auto participant: participants_)
+  	{
+      //TODO need to add dealer's cards as well
+  		result = participant->printHand();
+  	}
+  	return result;
+  }
+
+  
 private:
   std::set<chat_participant_ptr> participants_;
   enum { max_recent_msgs = 100 };
@@ -146,18 +206,40 @@ private:
         {
           if (!ec && read_msg_.decode_header()) 
           {
-          	// if player wants to hit
-            if( read_msg_.ca.hit == true)
-            {
-              std::cout << "Player hits" << std::endl;
-              Card temp = d.getCard();
-              read_msg_.card = temp;
-            }
-            // if player wants to stand
-            if ( read_msg_.ca.stand == true)
-            {
-            	std::cout << "Player stands" << std::endl;
-            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+          	if(read_msg_.ca.play == true) // fix so that one client doesn't start the game
+          	{
+          		room_.giveCard();
+          		room_.giveCard();
+
+          		std::string gui = room_.stringOfCards();
+
+
+          		char g[gui.size() +1 ];
+          		std::copy(gui.begin(), gui.end(), g);
+          		g[gui.size()] = '\0';
+          		strcpy(read_msg_.ca.g, g);
+          	}
+
+          	if(read_msg_.ca.hit == true)
+          	{
+          		//room_.hit(read_msg_.ca.id)
+          		{
+
+          		}
+          	}
             
            do_read_body(); 
           }
@@ -177,10 +259,15 @@ private:
         {
           if (!ec)
           {
-          	//code can go here too to send back to client
+          	
             
-            read_msg_.encode_header(); // save classes to msg data_ array to be ready to send
+
+            read_msg_.encode_header(); // save info in msg to be sent to client
             room_.deliver(read_msg_); // deliver msg to all clients
+
+
+            //room_.deliver(read_msg_, id); // can send to specific client
+
             do_read_header();
           }
           else
