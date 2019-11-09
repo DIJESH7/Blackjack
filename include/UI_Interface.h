@@ -19,6 +19,7 @@ class UI_Interface : public Gtk::Window
         void on_button_clicked();
         void on_new_clicked();
         void set_id(int id);
+        void redraw(std::string data);
 
     private:
     int id;

@@ -26,6 +26,7 @@ using asio::ip::tcp;
 typedef std::deque<chat_message> chat_message_queue;
 
 Hand h;
+UI_Interface* win;
 
 //------------------------------------------------------------------------------------------------
 
@@ -107,6 +108,7 @@ class chat_client
                         std::cout << std::endl;
                         std::cout << read_msg_.ca.g << std::endl;
                         do_read_body();
+                        storeData();
                       }
                       else
                       {
@@ -158,6 +160,11 @@ class chat_client
                     });
         }
 
+        void storeData()
+        {
+            std::string data(read_msg_.ca.g);
+            win->redraw(data);
+        }
     private:
         asio::io_context& io_context_;
         tcp::socket socket_;
@@ -210,7 +217,7 @@ int main(int argc, char* argv[])
     auto endpoints = resolver.resolve(argv[1], argv[2]);
     c = new chat_client(io_context, endpoints);
     Controller* controller = new Controller();
-    UI_Interface win(controller); 
+    win = new UI_Interface(controller); 
 
     std::thread t([&io_context](){ io_context.run(); });
     chat_message msg;
@@ -240,7 +247,7 @@ int main(int argc, char* argv[])
         c->write(msg);
     }
 
-    std::thread t2([&](){ app->run(win); });
+    std::thread t2([&](){ app->run(*win); });
 
     //main keeps waiting for gui to exit...
     //only after gui closes, we close client

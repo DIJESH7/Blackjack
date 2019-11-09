@@ -167,3 +167,8 @@ void UI_Interface::hit_button_pressed()
 {
     UI_Interface::controller->hit();
 }
+
+void UI_Interface::redraw(std::string data)
+{
+    std::cout << "I am called\n" << data << std::endl;
+}
