@@ -90,9 +90,15 @@ class chat_room
             else
             {
                 participants_.insert(participant);
-
+                handshake.ca.id = participant->id;
+                //strcpy(handshake.ca.g, "");
+                handshake.encode_header();
+                participant->deliver(handshake);
                 for (auto msg: recent_msgs_)
+                {
+                    msg.ca.id = participant->id;
                     participant->deliver(msg);
+                }
             }
 
 
@@ -178,6 +184,7 @@ class chat_room
         std::set<chat_participant_ptr> participants_;
         enum { max_recent_msgs = 100 };
         chat_message_queue recent_msgs_;
+        chat_message handshake;
 };
 
 //----------------------------------------------------------------------

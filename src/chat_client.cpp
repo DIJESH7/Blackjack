@@ -83,8 +83,6 @@ class chat_client
                     if (!ec)
                     {
                     std::cout << "\n\nWELCOME TO CASINO ROYALE!" << std::endl;
-                    std::cout << "New Player connected with Player ID "<< register_client() << std::endl;
-                    std::cout << "Your Player id:"<< id << std::endl;
                     do_read_header();
                     }
                     });
@@ -96,17 +94,24 @@ class chat_client
                     asio::buffer(read_msg_.data(), chat_message::header_length),
                     [this](std::error_code ec, std::size_t /*length*/)
                     {
-                    if (!ec && read_msg_.decode_header())
-                    {
-                    //system("clear");
-                    std::cout << std::endl;
-                    std::cout << read_msg_.ca.g << std::endl;
-                    do_read_body();
-                    }
-                    else
-                    {
-                    socket_.close();
-                    }
+                      if (!ec && read_msg_.decode_header())
+                      {
+                        //system("clear");
+                        if(!gotId) //runs only first time
+                        {
+                          id = read_msg_.ca.id;
+                          gotId = true;
+                          std::cout << "New Player connected with Player ID "<< id << std::endl;
+                          std::cout << "Your Player id: "<< id << std::endl;
+                        }
+                        std::cout << std::endl;
+                        std::cout << read_msg_.ca.g << std::endl;
+                        do_read_body();
+                      }
+                      else
+                      {
+                        socket_.close();
+                      }
                     });
         }
 
@@ -161,6 +166,7 @@ class chat_client
 
         std::string name;
         int id;
+        bool gotId = false;
 };
 
 chat_client* c;
