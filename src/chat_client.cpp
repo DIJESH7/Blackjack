@@ -93,6 +93,7 @@ class chat_client
                         {
                           id = read_msg_.ca.id;
                           gotId = true;
+                          win->set_id(id);
                           std::cout << "New Player connected with Player ID "<< id << std::endl;
                           std::cout << "Your Player id: "<< id << std::endl;
                         }

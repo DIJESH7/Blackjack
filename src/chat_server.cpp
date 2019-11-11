@@ -38,6 +38,7 @@ typedef std::deque<chat_message> chat_message_queue;
 // deck and hand are global variables so all classes can access
 Deck d;
 Hand h;
+bool reveal = false;
 
 //------------------------------------------------------------------------------------------------
 
@@ -68,6 +69,33 @@ class chat_participant
     private:
 
 
+};
+
+class Dealer : public chat_participant
+{
+    public:
+        Dealer() {}
+        ~Dealer() {}
+        std::string printHand()
+        {
+            std::string result;
+            result = playerHand.printAllHand(id);
+            if(!reveal)
+            {
+                std::stringstream ss(result);
+                std::string s = "";
+                std::string token = "";
+                std::getline(ss, s); //line with <-- Player 0...
+                s += "\n";
+                std::getline(ss, token); //line with first card
+                s += token;
+                s += '\n';
+                s += "B ACK2\n"; //give back of card
+                result = s;
+            }
+            return result;
+        }
+        void deliver(const chat_message& msg) {}
 };
 
 typedef std::shared_ptr<chat_participant> chat_participant_ptr;
@@ -156,6 +184,17 @@ class chat_room
                     temp = d.getCard();
                     participant->pHand(temp);
                 }
+                Card temp;
+                temp = d.getCard();
+                dealer->pHand(temp);
+                return;
+            }
+            if(pid == 0)
+            {
+                Card temp;
+                temp = d.getCard();
+                dealer->pHand(temp);
+                return;
             }
             else
             {
@@ -181,9 +220,11 @@ class chat_room
                 //TODO need to add dealer's cards as well
                 result += participant->printHand();
             }
+            result += dealer->printHand();
             return result;
         }
 
+        Dealer* dealer;
 
     private:
         std::set<chat_participant_ptr> participants_;
@@ -207,7 +248,12 @@ class chat_session
 
         void start() // client joins the chat room
         {
+            //initializes a dealer
+            room_.dealer = new Dealer();
+            room_.dealer->id = 0;
+            std::cout << "Got here\n " << std::endl;
             room_.join(shared_from_this());
+            std::cout << "Got here\n " << std::endl;
             do_read_header();
         }
 

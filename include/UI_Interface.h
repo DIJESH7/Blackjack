@@ -28,7 +28,7 @@ class UI_Interface : public Gtk::Window
     //std::vector<Gtk::Image*> Cards;
     int pid;
     Gtk::Statusbar* statusbar;
-    Gtk::Label* label;
+    std::vector<Gtk::Label*> labels;
     std::vector<Gtk::Button*> buttons;
     Gtk::VBox* vbox;
     Gtk::Grid *grid;

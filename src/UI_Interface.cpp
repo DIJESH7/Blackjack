@@ -43,7 +43,7 @@ UI_Interface::UI_Interface(Controller* controller)
 
     Gtk::Label *d_info = Gtk::manage(new Gtk::Label());
     d_info->set_label("Dealer :");
-    grid->attach(*d_info,1,1,1,1);
+    grid->attach(*d_info,0,0,1,1);
     grid->attach(*hit_button,6,3,1,1);
     grid->attach(*stand_button,7,3,1,1);
     grid->attach(*split_button,7,4,1,1);
@@ -57,93 +57,93 @@ UI_Interface::UI_Interface(Controller* controller)
     vbox->show_all();
 }
 
-    //int i;
-    //std::string l;
+//int i;
+//std::string l;
 
-    //Gtk::Image *d_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *d_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *d_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *d_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    //Gtk::Image *d_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *d_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *d_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *d_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    ////-----------------------------------------------------------------------------------------
+////-----------------------------------------------------------------------------------------
 
-    //Gtk::Image *p1_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p1_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p1_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p1_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    //Gtk::Image *p1_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p1_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p1_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p1_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    ////-----------------------------------------------------------------------------------------
+////-----------------------------------------------------------------------------------------
 
-    //Gtk::Image *p2_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p2_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p2_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p2_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    //Gtk::Image *p2_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p2_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p2_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p2_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    ////-----------------------------------------------------------------------------------------
+////-----------------------------------------------------------------------------------------
 
-    //Gtk::Image *p3_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p3_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p3_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p3_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    //Gtk::Image *p3_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p3_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p3_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p3_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    ////-----------------------------------------------------------------------------------------
+////-----------------------------------------------------------------------------------------
 
-    //Gtk::Image *p4_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p4_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p4_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p4_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    //Gtk::Image *p4_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p4_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p4_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p4_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    ////-----------------------------------------------------------------------------------------
+////-----------------------------------------------------------------------------------------
 
-    //Gtk::Image *p5_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p5_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p5_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p5_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    //Gtk::Image *p5_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p5_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p5_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p5_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    ////-----------------------------------------------------------------------------------------
+////-----------------------------------------------------------------------------------------
 
-    //Gtk::Image *p6_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p6_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p6_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p6_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    //Gtk::Image *p6_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-    //Gtk::Image *p6_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p6_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
+//Gtk::Image *p6_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
 
-    //-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
 
-    //grid->attach(*d_first_card,2,1,1,1);
-    //grid->attach(*d_second_card,3,1,1,1);    
-
-
-
-    //for(i=1;i<6;i++){
-    //    label = Gtk::manage(new Gtk::Label());
-    //    l = std::to_string(i);
-    //    label->set_label("player" + l);
-    //    grid->attach(*label,i,2,1,1);
-    //}
+//grid->attach(*d_first_card,2,1,1,1);
+//grid->attach(*d_second_card,3,1,1,1);    
 
 
-    //grid->attach(*p1_first_card,1,3,1,1);
-    //grid->attach(*p2_first_card,2,3,1,1);
-    //grid->attach(*p3_first_card,3,3,1,1);
-    //grid->attach(*p4_first_card,4,3,1,1);
-    //grid->attach(*p5_first_card,5,3,1,1);
+
+//for(i=1;i<6;i++){
+//    label = Gtk::manage(new Gtk::Label());
+//    l = std::to_string(i);
+//    label->set_label("player" + l);
+//    grid->attach(*label,i,2,1,1);
+//}
 
 
-    //grid->attach(*p1_second_card,1,3,1,1);
-    //grid->attach(*p2_second_card,2,3,1,1);
-    //grid->attach(*p3_second_card,3,3,1,1);
-    //grid->attach(*p4_second_card,4,3,1,1);
-    //grid->attach(*p5_second_card,5,3,1,1);            
+//grid->attach(*p1_first_card,1,3,1,1);
+//grid->attach(*p2_first_card,2,3,1,1);
+//grid->attach(*p3_first_card,3,3,1,1);
+//grid->attach(*p4_first_card,4,3,1,1);
+//grid->attach(*p5_first_card,5,3,1,1);
 
-    //vbox->add(*p2_sp_first_card);
-    //vbox->add(*p3_sp_first_card);
+
+//grid->attach(*p1_second_card,1,3,1,1);
+//grid->attach(*p2_second_card,2,3,1,1);
+//grid->attach(*p3_second_card,3,3,1,1);
+//grid->attach(*p4_second_card,4,3,1,1);
+//grid->attach(*p5_second_card,5,3,1,1);            
+
+//vbox->add(*p2_sp_first_card);
+//vbox->add(*p3_sp_first_card);
 
 //}
 
@@ -201,6 +201,7 @@ void UI_Interface::redraw(std::string data)
             token = token.substr(0,5); //substr to remove trailing spaces
             s += token;
             s += ".jpg";
+            std::cout << s << std::endl;
             images.insert(pair<int, Gtk::Image*>(id, Gtk::manage(new Gtk::Image(s))));
         }
     }
@@ -211,16 +212,41 @@ void UI_Interface::draw()
 {
     int prev = 0;
     int i = 1;
+    labels.clear();
 
     for (const auto& image : images)
     {
         //image.first is player id
-        if(prev < image.first)
+        if(prev != image.first)
         {
-            prev = image.first;
-            i = 1;
+            if(image.first != 0) //if not dealer
+            {
+                Gtk::Label *p_info = Gtk::manage(new Gtk::Label());
+                std::string info = "Player: ";
+                info += std::to_string(image.first);
+                if(image.first == UI_Interface::pid)
+                {
+                    info = "Yours: ";
+                }
+                p_info->set_label(info);
+                grid->attach(*p_info,image.first,1,1,1);
+                prev = image.first;
+                i = 1;
+            }
+            else
+            {
+                i = 0;
+            }
         }
-        grid->attach(*(image.second), image.first, ++i, 1, 1);
+        if(image.first == 0) //dealer
+        {
+            //attach horizontally
+            grid->attach(*(image.second), i++, image.first, 1, 1);
+        }
+        else
+        {
+            grid->attach(*(image.second), image.first, ++i, 1, 1);
+        }
     }
     vbox->show_all();
 }
