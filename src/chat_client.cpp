@@ -61,15 +61,6 @@ class chat_client
             asio::post(io_context_, [this]() { socket_.close(); });
         }
 
-        int register_client()
-        {
-            //  ask name
-            // all clients have 7
-            srand((unsigned) time(0));
-            id = rand() % 50;
-            return id;
-        }
-
         int get_id()
         {
             return id;
@@ -125,10 +116,6 @@ class chat_client
                     {
                     if (!ec)
                     {
-                    //std::cout << " getting card:" << read_msg_.card.value << std::endl;
-                    //h.addCard(read_msg_.card);
-                    //std::cout.write(read_msg_.body(), read_msg_.body_length());
-                    //std::cout << "\n";
                     do_read_header();
                     }
                     else
@@ -195,6 +182,7 @@ void Controller::hit()
 
     // hitting 1 card
     msg.ca.hit = true;
+    msg.ca.id = c->get_id();
     msg.encode_header(); // write hit
     c->write(msg);       // send hit
 }

@@ -19,10 +19,14 @@ class UI_Interface : public Gtk::Window
         void on_button_clicked();
         void on_new_clicked();
         void set_id(int id);
+        void draw();
         void redraw(std::string data);
 
     private:
-    int id;
+    std::multimap<int, Gtk::Image*> images;
+    std::vector<int> ids;
+    //std::vector<Gtk::Image*> Cards;
+    int pid;
     Gtk::Statusbar* statusbar;
     Gtk::Label* label;
     std::vector<Gtk::Button*> buttons;

@@ -9,6 +9,7 @@
 //
 
 #include <cstdlib>
+#include <thread>
 #include <deque>
 #include <iostream>
 #include <list>
@@ -16,6 +17,7 @@
 #include <set>
 #include <utility>
 #include <string>
+#include <ctime>
 #include "asio.hpp"
 #include "../include/chat_message.hpp"
 #include "../include/Deck.hpp"
@@ -86,6 +88,9 @@ class chat_room
             if(inplay || playercount > 6)
             {
                 //tell them to wait
+                strcpy(handshake.ca.g, "Please wait for the game to finish\n");
+                handshake.encode_header();
+                participant->deliver(handshake);
             }
             else
             {
@@ -170,11 +175,11 @@ class chat_room
 
         std::string stringOfCards() //string of every player's cards
         {
-            std::string result;
+            std::string result = "";
             for(auto participant: participants_)
             {
                 //TODO need to add dealer's cards as well
-                result = participant->printHand();
+                result += participant->printHand();
             }
             return result;
         }
@@ -244,7 +249,7 @@ class chat_session
 
                     if(read_msg_.ca.hit == true)
                     {
-                        room_.giveCard(1); 
+                        room_.giveCard(read_msg_.ca.id); 
                         std::string gui = room_.stringOfCards();
 
                         char g[gui.size() +1 ];
@@ -374,13 +379,26 @@ int main(int argc, char* argv[])
             tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[i]));
             servers.emplace_back(io_context, endpoint);
         }
-
-        io_context.run();
+        std::thread t([&io_context](){ io_context.run(); });
+        clock_t start = clock();
+        double seconds_passed;
+        double seconds_expire = 10;
+        while(true)
+        {
+            seconds_passed = (clock() - start)/CLOCKS_PER_SEC;
+            if(seconds_passed > seconds_expire)
+            {
+                std::cout << "Expired" << std::endl;
+                inplay = true;
+                break;
+            }
+        }
+        //io_context.run();
+        t.join();
     }
     catch (std::exception& e)
     {
         std::cerr << "Exception: " << e.what() << "\n";
     }
-
     return 0;
 }
