@@ -151,7 +151,7 @@ class chat_client
         void storeData()
         {
             std::string data(read_msg_.ca.g);
-            win->redraw(data);
+            win->redraw(data, read_msg_.ca.turn);
         }
     private:
         asio::io_context& io_context_;
@@ -184,8 +184,27 @@ void Controller::hit()
     // hitting 1 card
     msg.ca.hit = true;
     msg.ca.id = c->get_id();
+    msg.ca.play = false;
     msg.encode_header(); // write hit
     c->write(msg);       // send hit
+}
+
+void Controller::stand()
+{
+    std::cout << "Called" << std::endl;
+    char line[chat_message::max_body_length + 1];
+    //std::strcpy(line, "garbage");
+    chat_message msg;
+
+    msg.body_length(std::strlen(line));
+    std::memcpy(msg.body(), line, msg.body_length());
+
+    msg.ca.hit = false;
+    msg.ca.stand = true;
+    msg.ca.id = c->get_id();
+    msg.ca.play = false;
+    msg.encode_header();
+    c->write(msg);
 }
 
 int main(int argc, char* argv[])
@@ -232,6 +251,7 @@ int main(int argc, char* argv[])
 
         //start dealing
         msg.ca.play = true;
+        msg.ca.id = c->get_id();
         msg.encode_header();
         c->write(msg);
     }

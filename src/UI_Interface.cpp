@@ -36,10 +36,16 @@ UI_Interface::UI_Interface(Controller* controller)
 
     Gtk::Button *hit_button = Gtk::manage(new Gtk::Button("HIT"));
     hit_button->signal_clicked().connect([this] { this->hit_button_pressed(); });
+    //hit_button->set_device_enabled(Gdk::Device(*hit_button), false);
+    buttons.push_back(hit_button);
     Gtk::Button *stand_button = Gtk::manage(new Gtk::Button("STAND"));
+    stand_button->signal_clicked().connect([this] { this->stand_button_pressed(); });
     Gtk::Button *double_button = Gtk::manage(new Gtk::Button("DOUBLE"));
     Gtk::Button *split_button = Gtk::manage(new Gtk::Button("SPLIT"));
     Gtk::Button *leave_button = Gtk::manage(new Gtk::Button("LEAVE"));
+    buttons.push_back(stand_button);
+    buttons.push_back(double_button);
+    buttons.push_back(split_button);
 
     Gtk::Label *d_info = Gtk::manage(new Gtk::Label());
     d_info->set_label("Dealer :");
@@ -55,97 +61,12 @@ UI_Interface::UI_Interface(Controller* controller)
     vbox->add(*grid);
 
     vbox->show_all();
+    //hit_button->hide();
+    //stand_button->hide();
+    //double_button->hide();
+    //split_button->hide();
 }
 
-//int i;
-//std::string l;
-
-//Gtk::Image *d_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *d_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-//Gtk::Image *d_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *d_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-////-----------------------------------------------------------------------------------------
-
-//Gtk::Image *p1_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p1_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-//Gtk::Image *p1_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p1_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-////-----------------------------------------------------------------------------------------
-
-//Gtk::Image *p2_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p2_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-//Gtk::Image *p2_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p2_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-////-----------------------------------------------------------------------------------------
-
-//Gtk::Image *p3_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p3_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-//Gtk::Image *p3_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p3_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-////-----------------------------------------------------------------------------------------
-
-//Gtk::Image *p4_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p4_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-//Gtk::Image *p4_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p4_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-////-----------------------------------------------------------------------------------------
-
-//Gtk::Image *p5_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p5_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-//Gtk::Image *p5_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p5_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-////-----------------------------------------------------------------------------------------
-
-//Gtk::Image *p6_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p6_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-//Gtk::Image *p6_sp_first_card = Gtk::manage(new Gtk::Image(tile_image));
-//Gtk::Image *p6_sp_second_card = Gtk::manage(new Gtk::Image(tile_image));
-
-//-----------------------------------------------------------------------------------------
-
-//grid->attach(*d_first_card,2,1,1,1);
-//grid->attach(*d_second_card,3,1,1,1);    
-
-
-
-//for(i=1;i<6;i++){
-//    label = Gtk::manage(new Gtk::Label());
-//    l = std::to_string(i);
-//    label->set_label("player" + l);
-//    grid->attach(*label,i,2,1,1);
-//}
-
-
-//grid->attach(*p1_first_card,1,3,1,1);
-//grid->attach(*p2_first_card,2,3,1,1);
-//grid->attach(*p3_first_card,3,3,1,1);
-//grid->attach(*p4_first_card,4,3,1,1);
-//grid->attach(*p5_first_card,5,3,1,1);
-
-
-//grid->attach(*p1_second_card,1,3,1,1);
-//grid->attach(*p2_second_card,2,3,1,1);
-//grid->attach(*p3_second_card,3,3,1,1);
-//grid->attach(*p4_second_card,4,3,1,1);
-//grid->attach(*p5_second_card,5,3,1,1);            
-
-//vbox->add(*p2_sp_first_card);
-//vbox->add(*p3_sp_first_card);
-
-//}
 
 UI_Interface::~UI_Interface() {}
 
@@ -169,43 +90,78 @@ void UI_Interface::hit_button_pressed()
     UI_Interface::controller->hit();
 }
 
-void UI_Interface::redraw(std::string data)
+void UI_Interface::stand_button_pressed()
 {
-    images.clear(); //clear up vector
-    ids.clear();
-    std::stringstream ss(data);//convert string to sstream
-    int id = 0;
-    int i = 0;
+    std::cout << "Called" << std::endl;
+    UI_Interface::controller->stand();
+}
 
-    while(true)
+void UI_Interface::redraw(std::string data, int turn)
+{
+    std::cout << turn << " Turn " << std::endl;
+    if(turn != UI_Interface::pid)
     {
-        std::string token;
-        std::string s;
-        if(!(ss>>token))
+        for(auto button : UI_Interface::buttons)
         {
-            break;
-        }
-        if(token == "<--") //removes the line <-- Player x hand:
-        {
-            ss>>token;
-            ss>>id;
-            ids.push_back(id);
-            ss>>token;
-        }
-        else
-        {
-            s = "images/cards/";
-            token = token.substr(0,1); //substr to remove trailing spaces
-            s += token;
-            std::getline(ss,token);
-            token = token.substr(0,5); //substr to remove trailing spaces
-            s += token;
-            s += ".jpg";
-            std::cout << s << std::endl;
-            images.insert(pair<int, Gtk::Image*>(id, Gtk::manage(new Gtk::Image(s))));
+            button->set_sensitive(false);
         }
     }
-    draw();
+    else if(turn == UI_Interface::pid)
+    {
+        for(auto button : UI_Interface::buttons)
+        {
+            std::cout << "Called buttons: "<< button << std::endl; 
+            button->set_sensitive(true);
+        }
+    }
+    //only destroy and refresh if there
+    //was any update  in the message
+    std::cout << "LEN: " << data.length() << std::endl;
+    if(data.length() >= 5) //used 5 just in case of some escaped \0 or \n or ' '
+    {
+        std::cout << "CALLED: :" << std::endl;
+        for (auto image : images)
+        {
+            delete (image.second); //destroy those images; they can overlap
+            //if left alone
+
+        }
+        images.clear(); //clear up vector
+        ids.clear();
+        std::stringstream ss(data);//convert string to sstream
+        int id = 0;
+        int i = 0;
+
+        while(true)
+        {
+            std::string token;
+            std::string s;
+            if(!(ss>>token))
+            {
+                break;
+            }
+            if(token == "<--") //removes the line <-- Player x hand:
+            {
+                ss>>token;
+                ss>>id;
+                ids.push_back(id);
+                ss>>token;
+            }
+            else
+            {
+                s = "images/cards/";
+                token = token.substr(0,1); //substr to remove trailing spaces
+                s += token;
+                std::getline(ss,token);
+                token = token.substr(0,5); //substr to remove trailing spaces
+                s += token;
+                s += ".jpg";
+                std::cout << s << std::endl;
+                images.insert(pair<int, Gtk::Image*>(id, Gtk::manage(new Gtk::Image(s))));
+            }
+        }
+        draw();
+    }
 }
 
 void UI_Interface::draw()
