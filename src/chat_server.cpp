@@ -67,7 +67,7 @@ class chat_participant
             for(auto hand : playerHand)
             {
                 result += hand.printAllHand(id);
-                result += "hand: " + std::to_string(i) + "\n";
+                //result += "hand: " + std::to_string(i) + "\n";
             }
             return result;
         }
@@ -469,14 +469,14 @@ class chat_session
                       {
                           room_.giveCard(read_msg_.ca.id); 
                           std::string gui = room_.stringOfCards();
-                          bool busted = room_.check_points(read_msg_.ca.id);
+                          //bool busted = room_.check_points(read_msg_.ca.id);
 
                           char g[gui.size() +1 ];
                           std::copy(gui.begin(), gui.end(), g);
                           g[gui.size()] = '\0';
                           strcpy(read_msg_.ca.g, g);
-                          if(busted)
-                            read_msg_.ca.stand = true;
+                          //if(busted)
+                            //read_msg_.ca.stand = true;
                       }
                       if(read_msg_.ca.stand == true)
                       {
