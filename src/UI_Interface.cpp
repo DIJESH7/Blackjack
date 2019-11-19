@@ -114,6 +114,7 @@ void UI_Interface::redraw(std::string data, int turn)
             button->set_sensitive(true);
         }
     }
+    std::cout << "Got here" << std::endl;
     //only destroy and refresh if there
     //was any update  in the message
     std::cout << "LEN: " << data.length() << std::endl;
@@ -130,6 +131,7 @@ void UI_Interface::redraw(std::string data, int turn)
         ids.clear();
         std::stringstream ss(data);//convert string to sstream
         int id = 0;
+        int hid = 0;
         int i = 0;
 
         while(true)
@@ -147,9 +149,14 @@ void UI_Interface::redraw(std::string data, int turn)
                 ids.push_back(id);
                 ss>>token;
             }
+            else if(token == "hand:")
+            {
+                ss>>hid;
+            }
             else
             {
                 s = "images/cards/";
+                std::cout << token << std::endl;
                 token = token.substr(0,1); //substr to remove trailing spaces
                 s += token;
                 std::getline(ss,token);

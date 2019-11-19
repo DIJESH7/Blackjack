@@ -57,21 +57,73 @@ class chat_participant
 
         void pHand(Card t)
         {
-            playerHand.addCard(t);
+            getCurrentHand().addCard(t);
         }
 
         std::string printHand()
         {
-            std::string result;
-            result = playerHand.printAllHand(id);
+            std::string result = "";
+            int i = 0;
+            for(auto hand : playerHand)
+            {
+                result += hand.printAllHand(id);
+                result += "hand: " + std::to_string(i) + "\n";
+            }
             return result;
+        }
+
+        Hand& getCurrentHand()
+        {
+            if (playerHand.size() == 0)
+            {
+                Hand h;
+                playerHand.push_back(h);
+            }
+            return playerHand[currentHand];
+        }
+
+        //TODO check why it works only sometimes
+        bool checkBust()
+        {
+            std::cout << getCurrentHand().isBust() << std::endl;
+            std::cout << getCurrentHand().getTotal() << std::endl;
+            return getCurrentHand().isBust();
+        }
+
+        bool setNextHand()
+        {
+            if(currentHand < playerHand.size()-1)
+            {
+                currentHand++;
+                return true;
+            }
+            else
+                return false;
+        }
+
+        //TODO test if its working
+        void split()
+        {
+            if(getCurrentHand().canSplit())
+            {
+                Hand h;
+                playerHand.insert(playerHand.begin()+currentHand, h);
+                Card temp;
+                temp = d.getCard();
+                Card c = getCurrentHand().split();
+                pHand(temp);
+                temp = d.getCard();
+                playerHand[currentHand+1].addCard(c);
+                playerHand[currentHand+1].addCard(temp);
+            }
         }
 
 
         int id;
-        Hand playerHand;
         bool play = false;
     private:
+        int currentHand = 0;
+        std::vector<Hand> playerHand;
 
 
 };
@@ -85,6 +137,7 @@ class Dealer : public chat_participant
         {
             std::string result;
             result = playerHand.printAllHand(id);
+            std::cout << result << std::endl;
             std::cout << "reveal: " << reveal << std::endl;
             if(reveal == false)
             {
@@ -102,6 +155,11 @@ class Dealer : public chat_participant
             return result;
         }
 
+        void pHand(Card t)
+        {
+            playerHand.addCard(t);
+        }
+
         void deal()
         {
             while(playerHand.getTotal() < 17)
@@ -113,6 +171,8 @@ class Dealer : public chat_participant
         }
 
         void deliver(const chat_message& msg) {}
+    private:
+        Hand playerHand;
 };
 
 typedef std::shared_ptr<chat_participant> chat_participant_ptr;
@@ -229,7 +289,21 @@ class chat_room
             }
         }
 
-
+        bool check_points(int id)
+        {
+            std::cout << "Called" << std::endl;
+            for (auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    if(participant->checkBust())
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
         std::string stringOfCards() //string of every player's cards
         {
@@ -240,6 +314,7 @@ class chat_room
                 result += participant->printHand();
             }
             result += dealer->printHand();
+            std::cout << result << std::endl;
             return result;
         }
 
@@ -270,6 +345,17 @@ class chat_room
             for (auto participant : participants_)
             {
                 participant->deliver(handshake);
+            }
+        }
+
+        void splitHand(int id)
+        {
+            for (auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    participant->split();
+                }
             }
         }
 
@@ -383,13 +469,16 @@ class chat_session
                       {
                           room_.giveCard(read_msg_.ca.id); 
                           std::string gui = room_.stringOfCards();
+                          bool busted = room_.check_points(read_msg_.ca.id);
 
                           char g[gui.size() +1 ];
                           std::copy(gui.begin(), gui.end(), g);
                           g[gui.size()] = '\0';
                           strcpy(read_msg_.ca.g, g);
+                          if(busted)
+                            read_msg_.ca.stand = true;
                       }
-                      else if(read_msg_.ca.stand == true)
+                      if(read_msg_.ca.stand == true)
                       {
                           if(turn < room_.sizeOfParticipants())
                           {
@@ -407,6 +496,10 @@ class chat_session
                             g[gui.size()] = '\0';
                             strcpy(read_msg_.ca.g, g);
                           }
+                      }
+                      else if(read_msg_.ca.split == true)
+                      {
+                          room_.splitHand(read_msg_.ca.id);
                       }
 
                       do_read_body(); 

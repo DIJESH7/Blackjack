@@ -185,6 +185,7 @@ void Controller::hit()
     msg.ca.hit = true;
     msg.ca.id = c->get_id();
     msg.ca.play = false;
+    msg.ca.split = false;
     msg.encode_header(); // write hit
     c->write(msg);       // send hit
 }
