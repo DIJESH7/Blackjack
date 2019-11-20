@@ -9,17 +9,19 @@
 //
 
 #include <cstdlib>
+#include <thread>
 #include <deque>
 #include <iostream>
 #include <list>
 #include <memory>
 #include <set>
 #include <utility>
+#include <string>
+#include <ctime>
 #include "asio.hpp"
-#include "chat_message.hpp"
-#include "Card.hpp"
-#include "Deck.hpp"
-#include "Hand.hpp"
+#include "../include/chat_message.hpp"
+#include "../include/Deck.hpp"
+#include "../include/Hand.hpp"
 
 
 
@@ -29,287 +31,639 @@ using asio::ip::tcp;
 
 typedef std::deque<chat_message> chat_message_queue;
 
-//----------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+// deck and hand are global variables so all classes can access
+Deck d;
+Hand h;
+int turn = 0;
+
+bool reveal              = false;
+bool deal                = false;
+bool dealer_initialized  = false;
+
+//------------------------------------------------------------------------------------------------
+
+
+
 
 class chat_participant
 {
-public:
-  virtual ~chat_participant() {}
-  virtual void deliver(const chat_message& msg) = 0;
-  int id = 0;
-private:
-  //int id = 0;
-  
+    public:
+        virtual ~chat_participant() {}
+        virtual void deliver(const chat_message& msg) = 0;
+
+        void pHand(Card t)
+        {
+            getCurrentHand().addCard(t);
+        }
+
+        std::string printHand()
+        {
+            std::string result = "";
+            int i = 0;
+            for(auto hand : playerHand)
+            {
+                result += hand.printAllHand(id);
+                //result += "hand: " + std::to_string(i) + "\n";
+            }
+            return result;
+        }
+
+        Hand& getCurrentHand()
+        {
+            if (playerHand.size() == 0)
+            {
+                Hand h;
+                playerHand.push_back(h);
+            }
+            return playerHand[currentHand];
+        }
+
+        //TODO check why it works only sometimes
+        bool checkBust()
+        {
+            std::cout << getCurrentHand().isBust() << std::endl;
+            std::cout << getCurrentHand().getTotal() << std::endl;
+            return getCurrentHand().isBust();
+        }
+
+        bool setNextHand()
+        {
+            if(currentHand < playerHand.size()-1)
+            {
+                currentHand++;
+                return true;
+            }
+            else
+                return false;
+        }
+
+        //TODO test if its working
+        void split()
+        {
+            if(getCurrentHand().canSplit())
+            {
+                Hand h;
+                playerHand.insert(playerHand.begin()+currentHand, h);
+                Card temp;
+                temp = d.getCard();
+                Card c = getCurrentHand().split();
+                pHand(temp);
+                temp = d.getCard();
+                playerHand[currentHand+1].addCard(c);
+                playerHand[currentHand+1].addCard(temp);
+            }
+        }
+
+
+        int id;
+        bool play = false;
+    private:
+        int currentHand = 0;
+        std::vector<Hand> playerHand;
+
+
+};
+
+class Dealer : public chat_participant
+{
+    public:
+        Dealer() {}
+        ~Dealer() {}
+        std::string printHand()
+        {
+            std::string result;
+            result = playerHand.printAllHand(id);
+            std::cout << result << std::endl;
+            std::cout << "reveal: " << reveal << std::endl;
+            if(reveal == false)
+            {
+                std::stringstream ss(result);
+                std::string s = "";
+                std::string token = "";
+                std::getline(ss, s); //line with <-- Player 0...
+                s += "\n";
+                std::getline(ss, token); //line with first card
+                s += token;
+                s += "\n";
+                s += "B ACK2\n"; //give back of card
+                result = s;
+            }
+            return result;
+        }
+
+        void pHand(Card t)
+        {
+            playerHand.addCard(t);
+        }
+
+        void deal()
+        {
+            while(playerHand.getTotal() < 17)
+            {
+                Card temp;
+                temp = d.getCard();
+                pHand(temp);
+            }
+        }
+
+        void deliver(const chat_message& msg) {}
+    private:
+        Hand playerHand;
 };
 
 typedef std::shared_ptr<chat_participant> chat_participant_ptr;
 
 //----------------------------------------------------------------------
 
+int playercount = 0;
+bool inplay = false;
+
 class chat_room
 {
-public:
-  void join(chat_participant_ptr participant)
-  {
-    participants_.insert(participant);
-    for (auto msg: recent_msgs_)
-    {
-      participant->deliver(msg);
-              participant->askBets();
-    }
-  }
+    public:
+        // puts client in participants vector and sends past msg logs
+        void join(chat_participant_ptr participant) 
+        {
+            participant->id = ++playercount;
 
-  void leave(chat_participant_ptr participant)
-  {
-    participants_.erase(participant);
-  }
-
-  void deliver(const chat_message& msg)
-  {
-    recent_msgs_.push_back(msg);
-    while (recent_msgs_.size() > max_recent_msgs)
-      recent_msgs_.pop_front();
-
-    for (auto participant: participants_)
-        participant->deliver(msg);
-    
-  }
-
-  // deliver msg to specific client
-  void deliver2(const chat_message& msg, int recipient_id)
-  {
-    recent_msgs_.push_back(msg);
-    while (recent_msgs_.size() > max_recent_msgs)
-      recent_msgs_.pop_front();
-
-    for (auto participant: participants_)
-    {
-      if(participant->id == recipient_id)
-        participant->deliver(msg);
-    }
-  }
-
-  void askBets()
-  {
-    for (auto participant : participants_)
-    {
-      participant->bets();
-    }
-  }
+            if(inplay || playercount > 6)
+            {
+                //tell them to wait
+                strcpy(handshake.ca.g, "Please wait for the game to finish\n");
+                handshake.ca.turn = 0;
+                handshake.encode_header();
+                participant->deliver(handshake);
+            }
+            else
+            {
+                participants_.insert(participant);
+                handshake.ca.id = participant->id;
+                handshake.ca.turn = 0;
+                //strcpy(handshake.ca.g, "");
+                handshake.encode_header();
+                participant->deliver(handshake);
+                for (auto msg: recent_msgs_)
+                {
+                    msg.ca.id = participant->id;
+                    participant->deliver(msg);
+                }
+            }
 
 
 
+        }
+
+        void leave(chat_participant_ptr participant)
+        {
+            participants_.erase(participant);
+        }
+
+        void deliver(const chat_message& msg)
+        {
+            recent_msgs_.push_back(msg);
+            while (recent_msgs_.size() > max_recent_msgs)
+                recent_msgs_.pop_front();
+
+            for (auto participant: participants_)
+                participant->deliver(msg);
+        }
+
+        // TODO deliver msg to specific client
+        void deliver2(const chat_message& msg, int recipient_id)
+        {
+            recent_msgs_.push_back(msg);
+            while (recent_msgs_.size() > max_recent_msgs)
+                recent_msgs_.pop_front();
+
+            for (auto participant: participants_)
+            {
+                if(participant->id == recipient_id)
+                    participant->deliver(msg);
+            }
+        }
 
 
-private:
-  std::set<chat_participant_ptr> participants_;
-  enum { max_recent_msgs = 100 };
-  chat_message_queue recent_msgs_;
+        int sizeOfParticipants()
+        {
+            int size = participants_.size();
+            return size;
+        }
+
+        void giveCard(int pid) // for initial dealing
+        {
+            if(pid == -1)
+            {
+                for(auto participant: participants_)
+                {	
+                    Card temp;
+                    temp = d.getCard();
+                    participant->pHand(temp);
+                }
+                Card temp;
+                temp = d.getCard();
+                dealer->pHand(temp);
+                return;
+            }
+            if(pid == 0)
+            {
+                Card temp;
+                temp = d.getCard();
+                dealer->pHand(temp);
+                return;
+            }
+            else
+            {
+                for(auto participant: participants_)
+                {
+                    if(participant->id == pid)
+                    {
+                        Card temp;
+                        temp = d.getCard();
+                        participant->pHand(temp);
+                    }
+                }
+            }
+        }
+
+        bool check_points(int id)
+        {
+            std::cout << "Called" << std::endl;
+            for (auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    if(participant->checkBust())
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        std::string stringOfCards() //string of every player's cards
+        {
+            std::string result = "";
+            for(auto participant: participants_)
+            {
+                //TODO need to add dealer's cards as well
+                result += participant->printHand();
+            }
+            result += dealer->printHand();
+            std::cout << result << std::endl;
+            return result;
+        }
+
+        bool checkAllPlay(int id)
+        {
+            for (auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    participant->play = true;
+                }
+                if(!participant->play)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        void changeActivePlayer(int pturn)
+        {
+            chat_message handshake;
+            handshake.ca.turn = pturn;
+            turn = pturn;
+            std::cout << "Got here" << std::endl;
+            handshake.encode_header();
+            std::cout << "Got far" << std::endl;
+            for (auto participant : participants_)
+            {
+                participant->deliver(handshake);
+            }
+        }
+
+        void splitHand(int id)
+        {
+            for (auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    participant->split();
+                }
+            }
+        }
+
+        Dealer* dealer;
+
+    private:
+        std::set<chat_participant_ptr> participants_;
+        enum { max_recent_msgs = 100 };
+        chat_message_queue recent_msgs_;
+        chat_message handshake;
 };
 
 //----------------------------------------------------------------------
 
 class chat_session
-  : public chat_participant,
+: public chat_participant,
     public std::enable_shared_from_this<chat_session>
 {
-public:
-  chat_session(tcp::socket socket, chat_room& room)
-    : socket_(std::move(socket)),
-      room_(room)
-  {
-
-    //testing
-    std::cout << "Dealer is here" << std::endl;
-
-    shoe.build();
-    shoe.shuffle();
-    std::cout << "getting 2 cards" << std::endl;
-
-    inHand.getCard();
-    inHand.getCard();
-    std::cout << "Hand is: "inHand.getTotalValue() << std::endl;
-  
-
-
-  }
-
-  void start()
-  {
-    room_.join(shared_from_this());
-    do_read_header();
-  }
-
-  void deliver(const chat_message& msg)
-  {
-    bool write_in_progress = !write_msgs_.empty();
-    write_msgs_.push_back(msg);
-    if (!write_in_progress)
+    public:
+        chat_session(tcp::socket socket, chat_room& room)
+            : socket_(std::move(socket)),
+            room_(room)
     {
-      do_write();
     }
-  }
 
-
-  void bets()
-  { 
-    auto self(shared_from_this());
-    asio::async_read(socket_,
-        asio::buffer(read_msg_.data(), chat_message::header_length),
-        [this, self](std::error_code ec, std::size_t /*length*/)
+        void start() // client joins the chat room
         {
-          if (!ec       )
-          {
-            std::cout << "how much to bet?" std::endl;
-          }
-
-        });
-  }
-
-
-
-private:
-  void do_read_header()
-  {
-    auto self(shared_from_this());
-    asio::async_read(socket_,
-        asio::buffer(read_msg_.data(), chat_message::header_length),
-        [this, self](std::error_code ec, std::size_t /*length*/)
-        {
-          if (!ec && read_msg_.decode_header())
-          {
-            do_read_body();
-          }
-          else
-          {
-            room_.leave(shared_from_this());
-          }
-        });
-  }
-
-  void do_read_body()
-  {
-    auto self(shared_from_this());
-    asio::async_read(socket_,
-        asio::buffer(read_msg_.body(), read_msg_.body_length()),
-        [this, self](std::error_code ec, std::size_t /*length*/)
-        {
-          if (!ec)
-          {
-            room_.deliver(read_msg_);
-            do_read_header();
-          }
-          else
-          {
-            room_.leave(shared_from_this());
-          }
-        });
-  }
-
-  void do_write()
-  {
-    auto self(shared_from_this());
-    asio::async_write(socket_,
-        asio::buffer(write_msgs_.front().data(),
-          write_msgs_.front().length()),
-        [this, self](std::error_code ec, std::size_t /*length*/)
-        {
-          if (!ec)
-          {
-            write_msgs_.pop_front();
-            if (!write_msgs_.empty())
+            //initializes a dealer only one time
+            if(!dealer_initialized)
             {
-              do_write();
+                dealer_initialized = true;
+                room_.dealer = new Dealer();
+                room_.dealer->id = 0;
             }
-          }
-          else
-          {
-            room_.leave(shared_from_this());
-          }
-        });
-  }
+            room_.join(shared_from_this());
+            do_read_header();
+        }
+
+        void deliver(const chat_message& msg) // send saved past msg log
+        {
+            bool write_in_progress = !write_msgs_.empty();
+            write_msgs_.push_back(msg);
+            if (!write_in_progress)
+            {
+                do_write();
+            }
+        }
 
 
-  //dealer to add card to hand
-  void getCard()
-  {
-    Card temp;
-    temp = shoe.getCard();
-    temp.display();
-    inHand.addToHand(temp);
+    private:
+        // calls data() and waits for an async_write from client's do_write then calls decode
+        void do_read_header() 
+        {
+            auto self(shared_from_this());
+            asio::async_read(socket_,
+                    asio::buffer(read_msg_.data(), chat_message::header_length),
+                    [this, self](std::error_code ec, std::size_t /*length*/)
+                    {
+                    if (!ec && read_msg_.decode_header()) 
+                    {
 
-  }
+                      if(read_msg_.ca.play == true)
+                      {
+
+                          if(!deal) //deal cards to dealer first time only
+                          {
+                            room_.giveCard(0);
+                            room_.giveCard(0);
+                            deal = true;
+                          }
+                          room_.giveCard(read_msg_.ca.id);
+                          room_.giveCard(read_msg_.ca.id);
+                          std::string gui = room_.stringOfCards();
+                          char g[gui.size() +1 ];
+                          std::copy(gui.begin(), gui.end(), g);
+                          g[gui.size()] = '\0';
+                          strcpy(read_msg_.ca.g, g);
+                          //if not dealt before and play from player first
+                          //std::cout << read_msg_.ca.id << std::endl;
+                          //if(!deal && (read_msg_.ca.id == 1))
+                          //{
+                          //  //thread starts
+                          //  std::thread t([&](){
+                          //  while(true)
+                          //  {
+                          //    std::cout << "H" << std::endl;
+                          //    //when everyone is ready and 
+                          //    //timer expires and didn't deal before
+                          //    if(room_.checkAllPlay(read_msg_.ca.id) && inplay)
+                          //    {
+                          //        deal = true;
+                          //        room_.giveCard(-1);
+                          //        room_.giveCard(-1);
+                          //        std::string gui = room_.stringOfCards();
+                          //        char g[gui.size() +1 ];
+                          //        std::copy(gui.begin(), gui.end(), g);
+                          //        g[gui.size()] = '\0';
+                          //        strcpy(read_msg_.ca.g, g);
+                          //        std::cout << "DONE" << std::endl;
+                          //        break;
+                          //    }
+                          //  }
+                          //  
+                          //  });
+                          //  //thread ends 
+                          //  //t.join();
+                          //} didnot work out well with threads
+                      }
+
+                      if(read_msg_.ca.hit == true)
+                      {
+                          room_.giveCard(read_msg_.ca.id); 
+                          std::string gui = room_.stringOfCards();
+                          //bool busted = room_.check_points(read_msg_.ca.id);
+
+                          char g[gui.size() +1 ];
+                          std::copy(gui.begin(), gui.end(), g);
+                          g[gui.size()] = '\0';
+                          strcpy(read_msg_.ca.g, g);
+                          //if(busted)
+                            //read_msg_.ca.stand = true;
+                      }
+                      if(read_msg_.ca.stand == true)
+                      {
+                          if(turn < room_.sizeOfParticipants())
+                          {
+                            turn++;
+                          }
+                          else
+                          {
+                            turn = -1; //everyone is finished so dealer's turn
+                            reveal = true;
+                            room_.dealer->deal();
+                            std::string gui = room_.stringOfCards();
+
+                            char g[gui.size() +1 ];
+                            std::copy(gui.begin(), gui.end(), g);
+                            g[gui.size()] = '\0';
+                            strcpy(read_msg_.ca.g, g);
+                          }
+                      }
+                      else if(read_msg_.ca.split == true)
+                      {
+                          room_.splitHand(read_msg_.ca.id);
+                      }
+
+                      do_read_body(); 
+                    }
+                    else
+                    {
+                        room_.leave(shared_from_this());
+                    }
+                    });
+        }
+
+        void do_read_body()
+        {
+            auto self(shared_from_this());
+            asio::async_read(socket_,
+                    asio::buffer(read_msg_.body(), read_msg_.body_length()),
+                    [this, self](std::error_code ec, std::size_t /*length*/)
+                    {
+                    if (!ec)
+                    {
+
+                    read_msg_.ca.turn = turn;
+                    read_msg_.encode_header(); // save info in msg to be sent to client
+                    std::cout << "Here\n" << read_msg_.ca.turn << std::endl;
+                    room_.deliver(read_msg_); // deliver msg to all clients
 
 
+                    //room_.deliver(read_msg_, id); // can send to specific client
 
+                    do_read_header();
+                    }
+                    else
+                    {
+                    room_.leave(shared_from_this());
+                    }
+                    });
+        }
 
-  tcp::socket socket_;
-  chat_room& room_;
-  chat_message read_msg_;
-  chat_message_queue write_msgs_;
+        void do_write()
+        {
+            auto self(shared_from_this());
+            asio::async_write(socket_,
+                    asio::buffer(write_msgs_.front().data(),
+                        write_msgs_.front().length()),
+                    [this, self](std::error_code ec, std::size_t /*length*/)
+                    {
+                    if (!ec)
+                    {
+                    write_msgs_.pop_front();
+                    if (!write_msgs_.empty())
+                    {
+                    do_write();
+                    }
+                    }
+                    else
+                    {
+                    room_.leave(shared_from_this());
+                    }
+                    });
+        }
 
-  Deck shoe;
-  Hand inHand;
+        tcp::socket socket_;
+        chat_room& room_;
+        chat_message read_msg_;
+        chat_message_queue write_msgs_;
+
 };
 
 //----------------------------------------------------------------------
 
 class chat_server
 {
-public:
-  chat_server(asio::io_context& io_context,
-      const tcp::endpoint& endpoint)
-    : acceptor_(io_context, endpoint)
-  {
-    do_accept();
-  }
-
-private:
-  void do_accept()
-  {
-    acceptor_.async_accept( // waiting for clients
-        [this](std::error_code ec, tcp::socket socket)
+    public:
+        chat_server(asio::io_context& io_context,
+                const tcp::endpoint& endpoint)
+            : acceptor_(io_context, endpoint)
         {
-          if (!ec)
-          {
-            std::make_shared<chat_session>(std::move(socket), room_)->start(); // start the chat_session
-          }
+            do_accept(); 
+        }
 
-          do_accept();
-        });
-  }
+        void start_play()
+        {
+            room_.changeActivePlayer(1);
+        }
 
-  tcp::acceptor acceptor_;
-  chat_room room_;
+        int numPlayers()
+        {
+            return room_.sizeOfParticipants();
+        }
+
+    private:
+        void do_accept() // accepts client's do_connect() call
+        {
+            acceptor_.async_accept( 
+                    [this](std::error_code ec, tcp::socket socket)
+                    {
+                    if (!ec)
+                    {
+                    // start the chat_session and calls start()
+                    std::make_shared<chat_session>(std::move(socket), room_)->start(); 
+                    }
+                    // waiting for more clients
+                    do_accept(); 
+                    });
+        }
+
+        tcp::acceptor acceptor_;
+        chat_room room_;
 };
 
 //----------------------------------------------------------------------
 
 int main(int argc, char* argv[])
 { 
-  try
-  {
-    if (argc < 2)
+    try
     {
-      std::cerr << "Usage: chat_server <port> [<port> ...]\n";
-      return 1;
+        if (argc < 2)
+        {
+            std::cerr << "Usage: chat_server <port> [<port> ...]\n";
+            return 1;
+        }
+        asio::io_context io_context;
+
+        //making deck and shuffling
+        d.build();
+        d.shuffle();
+
+        std::list<chat_server> servers; 
+
+        // starting a server calls the do_accept() function
+        for (int i = 1; i < argc; ++i) 
+        { 
+            tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[i]));
+            servers.emplace_back(io_context, endpoint);
+        }
+        std::thread t([&io_context](){ io_context.run(); });
+        double seconds_passed;
+        double seconds_expire = 10;
+        while(true)
+        {
+            if(servers.front().numPlayers() >= 1)
+            {
+                //start the clock when one player joins
+                clock_t start = clock();
+                while(true) 
+                {
+                    seconds_passed = (clock() - start)/CLOCKS_PER_SEC;
+                    if(seconds_passed > seconds_expire)
+                    {
+                        std::cout << "Expired" << std::endl;
+                        inplay = true;
+                        servers.front().start_play();
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        //io_context.run();
+        t.join();
     }
-
-    asio::io_context io_context;
-
-    std::list<chat_server> servers;
-    for (int i = 1; i < argc; ++i) // for if you type more than one port
-    { 
-      tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[i]));
-      servers.emplace_back(io_context, endpoint);
+    catch (std::exception& e)
+    {
+        std::cerr << "Exception: " << e.what() << "\n";
     }
-
-    io_context.run();
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << "Exception: " << e.what() << "\n";
-  }
-
-  return 0;
+    return 0;
 }

@@ -1,60 +1,89 @@
-#pragma once
+#ifndef CARD_H
+#define CARD_H
+
 #include <iostream>
-//#include <string>
-#include "enums.h"
 
 using namespace std;
 
+
 class Card
 {
-    public:
-        Card();
-        Card(Rank rank, Suit suit);
-        //Card Card(Integer, Integer);
+public:
+  Card()
+  {
 
-  // prints the card info in a string
+  }
+  /*
+  Card(Rank rank, Suit suit)
+  {
+      rank_ = rank;
+      suit_ = suit;
+      isFaceUp = false;
+  }
+
+
   void display() 
   {
       const char * rankText[] = { " ", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King" };
-
       const char * suitText[] = { "Spades", "Hearts", "Clubs", "Diamonds" };
-      
-      cout << rankText[rank_] << " of " << suitText[suit_] << endl;
+      std::cout << rankText[rank_] << " of " << suitText[suit_] << std::endl;
+  }
+  */
+
+  void display() 
+  {
+     std::cout << rank_ << " of " << suit_ << std::endl;
   }
 
+  std::string printCard()
+  {
+    std::string result;
+    result += rank_;
+    result += " of ";
+    result += suit_;
+    result += "  \n";
+    return result;
+  }
+
+  void flip()
+  {
+    isFaceUp =!isFaceUp;
+  }
   void setValue(int val)
   {
      value = val;
   }
-
-  void setRank(Rank rank)
-  {
-     rank_ = rank;
-  }
-
-  void setSuit(Suit suit)
-  {
-     suit_ = suit;
-  }
-
+  
   int getValue()
   {
-     return value;
+    return value;
+  }
+  char getRank()
+  {
+    return rank_;
+  }
+  char getSuit()
+  {
+    return suit_;
   }
 
-  Rank getRank()
+  void setInfo(int v, char r, char s)
   {
-     return rank_;
+    value = v;
+    rank_ = r;
+    suit_ = s;
+    isFaceUp = false;
   }
-
-  Suit getSuit()
-  {
-     return suit_;
-  }
+  
+  char rank_;
+  char suit_;
+  int value;
+  bool isFaceUp;
 
 private:
-  Rank rank_;
-  Suit suit_;
-  int value;
-  
+
 };
+
+
+#endif
+

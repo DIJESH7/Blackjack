@@ -4,7 +4,7 @@
 //#include <stdlib>
 #include <string>
 #include <vector>
-#include "Hand.h"
+#include "Hand.hpp"
 
 using namespace std;
 
