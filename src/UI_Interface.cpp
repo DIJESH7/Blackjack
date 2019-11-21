@@ -42,6 +42,7 @@ UI_Interface::UI_Interface(Controller* controller)
     stand_button->signal_clicked().connect([this] { this->stand_button_pressed(); });
     Gtk::Button *double_button = Gtk::manage(new Gtk::Button("DOUBLE"));
     Gtk::Button *split_button = Gtk::manage(new Gtk::Button("SPLIT"));
+    split_button->signal_clicked().connect([this] { this->split_button_pressed(); });
     Gtk::Button *leave_button = Gtk::manage(new Gtk::Button("LEAVE"));
     buttons.push_back(stand_button);
     buttons.push_back(double_button);
@@ -96,7 +97,13 @@ void UI_Interface::stand_button_pressed()
     UI_Interface::controller->stand();
 }
 
-void UI_Interface::redraw(std::string data, int turn)
+void UI_Interface::split_button_pressed()
+{
+    UI_Interface::controller->split();
+
+}
+
+void UI_Interface::redraw(std::string data, int turn, bool split)
 {
     std::cout << turn << " Turn " << std::endl;
     if(turn != UI_Interface::pid)
@@ -165,6 +172,7 @@ void UI_Interface::redraw(std::string data, int turn)
                 s += ".jpg";
                 std::cout << s << std::endl;
                 images.insert(pair<int, Gtk::Image*>(id, Gtk::manage(new Gtk::Image(s))));
+		//set_from_resource
             }
         }
         draw();

@@ -67,7 +67,7 @@ class chat_participant
             for(auto hand : playerHand)
             {
                 result += hand.printAllHand(id);
-                //result += "hand: " + std::to_string(i) + "\n";
+                result += "hand: " + std::to_string(i++) + "\n";
             }
             return result;
         }
@@ -106,8 +106,9 @@ class chat_participant
         {
             if(getCurrentHand().canSplit())
             {
+		std::cout << "called split" << std::endl;
                 Hand h;
-                playerHand.insert(playerHand.begin()+currentHand, h);
+                playerHand.insert(playerHand.begin()+currentHand+1, h);
                 Card temp;
                 temp = d.getCard();
                 Card c = getCurrentHand().split();
@@ -117,6 +118,11 @@ class chat_participant
                 playerHand[currentHand+1].addCard(temp);
             }
         }
+
+	bool checkSplit()
+	{
+	    return getCurrentHand().canSplit();	
+	}
 
 
         int id;
@@ -359,6 +365,18 @@ class chat_room
             }
         }
 
+	bool canBeSplit(int id)
+	{
+            for (auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    return participant->checkSplit();
+                }
+            }
+	    return false;
+	}
+
         Dealer* dealer;
 
     private:
@@ -433,36 +451,7 @@ class chat_session
                           std::copy(gui.begin(), gui.end(), g);
                           g[gui.size()] = '\0';
                           strcpy(read_msg_.ca.g, g);
-                          //if not dealt before and play from player first
-                          //std::cout << read_msg_.ca.id << std::endl;
-                          //if(!deal && (read_msg_.ca.id == 1))
-                          //{
-                          //  //thread starts
-                          //  std::thread t([&](){
-                          //  while(true)
-                          //  {
-                          //    std::cout << "H" << std::endl;
-                          //    //when everyone is ready and 
-                          //    //timer expires and didn't deal before
-                          //    if(room_.checkAllPlay(read_msg_.ca.id) && inplay)
-                          //    {
-                          //        deal = true;
-                          //        room_.giveCard(-1);
-                          //        room_.giveCard(-1);
-                          //        std::string gui = room_.stringOfCards();
-                          //        char g[gui.size() +1 ];
-                          //        std::copy(gui.begin(), gui.end(), g);
-                          //        g[gui.size()] = '\0';
-                          //        strcpy(read_msg_.ca.g, g);
-                          //        std::cout << "DONE" << std::endl;
-                          //        break;
-                          //    }
-                          //  }
-                          //  
-                          //  });
-                          //  //thread ends 
-                          //  //t.join();
-                          //} didnot work out well with threads
+			  read_msg_.ca.split_button = room_.canBeSplit(read_msg_.ca.id);
                       }
 
                       if(read_msg_.ca.hit == true)
@@ -500,6 +489,7 @@ class chat_session
                       else if(read_msg_.ca.split == true)
                       {
                           room_.splitHand(read_msg_.ca.id);
+			  read_msg_.ca.split_button = room_.canBeSplit(read_msg_.ca.id);
                       }
 
                       do_read_body(); 

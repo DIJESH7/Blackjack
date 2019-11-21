@@ -20,7 +20,7 @@ class UI_Interface : public Gtk::Window
         void on_new_clicked();
         void set_id(int id);
         void draw();
-        void redraw(std::string data, int turn);
+        void redraw(std::string data, int turn, bool split);
 
     private:
     std::multimap<int, Gtk::Image*> images;

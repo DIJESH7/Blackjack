@@ -151,7 +151,7 @@ class chat_client
         void storeData()
         {
             std::string data(read_msg_.ca.g);
-            win->redraw(data, read_msg_.ca.turn);
+            win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button);
         }
     private:
         asio::io_context& io_context_;
@@ -188,6 +188,24 @@ void Controller::hit()
     msg.ca.split = false;
     msg.encode_header(); // write hit
     c->write(msg);       // send hit
+}
+
+void Controller::split()
+{
+    char line[chat_message::max_body_length + 1];
+    //std::strcpy(line, "garbage");
+    chat_message msg;
+
+    msg.body_length(std::strlen(line));
+    std::memcpy(msg.body(), line, msg.body_length());
+
+    msg.ca.hit = false;
+    msg.ca.split = true;
+    msg.ca.stand = false;
+    msg.ca.id = c->get_id();
+    msg.ca.play = false;
+    msg.encode_header();
+    c->write(msg);
 }
 
 void Controller::stand()

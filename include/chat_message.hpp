@@ -37,6 +37,7 @@ class client_action
         bool stand = false;
         bool doubledown = false;
         bool split = false;
+	bool split_button = false;
         bool surrender = false;
         bool insurance = false;
         bool play = false;
