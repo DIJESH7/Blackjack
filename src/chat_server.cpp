@@ -490,6 +490,15 @@ class chat_session
                       {
                           room_.splitHand(read_msg_.ca.id);
 			  read_msg_.ca.split_button = room_.canBeSplit(read_msg_.ca.id);
+                          std::string gui = room_.stringOfCards();
+                          //bool busted = room_.check_points(read_msg_.ca.id);
+
+                          char g[gui.size() +1 ];
+                          std::copy(gui.begin(), gui.end(), g);
+                          g[gui.size()] = '\0';
+                          strcpy(read_msg_.ca.g, g);
+                          //if(busted)
+                            //read_msg_.ca.stand = true;
                       }
 
                       do_read_body(); 

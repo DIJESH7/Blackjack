@@ -130,9 +130,10 @@ void UI_Interface::redraw(std::string data, int turn, bool split)
         std::cout << "CALLED: :" << std::endl;
         for (auto image : images)
         {
+            std::cout << image.second << std::endl;
+            grid->remove(*(image.second));
             delete (image.second); //destroy those images; they can overlap
             //if left alone
-
         }
         images.clear(); //clear up vector
         ids.clear();
@@ -219,5 +220,7 @@ void UI_Interface::draw()
             grid->attach(*(image.second), image.first, ++i, 1, 1);
         }
     }
+    std::cout << "Almost there" << std::endl;
     vbox->show_all();
+    std::cout << "Reached end" << std::endl;
 }
