@@ -83,9 +83,12 @@ class chat_participant
         }
 
         //TODO check why it works only sometimes
+        //FIXME hand.hpp only checks if ace in hand, 
+        //if yes -10, and sets ace.value = 1,
+        //but this cannot work for reference...
         bool checkBust()
         {
-            std::cout << getCurrentHand().isBust() << std::endl;
+            std::cout << "HERE\n " << getCurrentHand().isBust() << std::endl;
             std::cout << getCurrentHand().getTotal() << std::endl;
             return getCurrentHand().isBust();
         }
@@ -354,6 +357,18 @@ class chat_room
             }
         }
 
+        bool setNextHand(int id)
+        {
+            for(auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    return participant->setNextHand();
+                }
+            }
+            return false;
+        }
+
         void splitHand(int id)
         {
             for (auto participant : participants_)
@@ -458,47 +473,52 @@ class chat_session
                       {
                           room_.giveCard(read_msg_.ca.id); 
                           std::string gui = room_.stringOfCards();
-                          //bool busted = room_.check_points(read_msg_.ca.id);
+                          bool busted = room_.check_points(read_msg_.ca.id);
 
                           char g[gui.size() +1 ];
                           std::copy(gui.begin(), gui.end(), g);
                           g[gui.size()] = '\0';
                           strcpy(read_msg_.ca.g, g);
-                          //if(busted)
-                            //read_msg_.ca.stand = true;
-                      }
-                      if(read_msg_.ca.stand == true)
-                      {
-                          if(turn < room_.sizeOfParticipants())
-                          {
-                            turn++;
-                          }
-                          else
-                          {
-                            turn = -1; //everyone is finished so dealer's turn
-                            reveal = true;
-                            room_.dealer->deal();
-                            std::string gui = room_.stringOfCards();
-
-                            char g[gui.size() +1 ];
-                            std::copy(gui.begin(), gui.end(), g);
-                            g[gui.size()] = '\0';
-                            strcpy(read_msg_.ca.g, g);
-                          }
+                          if(busted)
+                            read_msg_.ca.stand = true;
                       }
                       else if(read_msg_.ca.split == true)
                       {
                           room_.splitHand(read_msg_.ca.id);
 			  read_msg_.ca.split_button = room_.canBeSplit(read_msg_.ca.id);
                           std::string gui = room_.stringOfCards();
-                          //bool busted = room_.check_points(read_msg_.ca.id);
+                          bool busted = room_.check_points(read_msg_.ca.id);
 
                           char g[gui.size() +1 ];
                           std::copy(gui.begin(), gui.end(), g);
                           g[gui.size()] = '\0';
                           strcpy(read_msg_.ca.g, g);
-                          //if(busted)
-                            //read_msg_.ca.stand = true;
+                          if(busted)
+                            read_msg_.ca.stand = true;
+                      }
+
+                      if(read_msg_.ca.stand == true)
+                      {
+                          //if setNextHand true, it sets player hand to next hand
+                          if(!room_.setNextHand(read_msg_.ca.id))
+                          {
+                            if(turn < room_.sizeOfParticipants())
+                            {
+                              turn++;
+                            }
+                            else
+                            {
+                              turn = -1; //everyone is finished so dealer's turn
+                              reveal = true;
+                              room_.dealer->deal();
+                              std::string gui = room_.stringOfCards();
+
+                              char g[gui.size() +1 ];
+                              std::copy(gui.begin(), gui.end(), g);
+                              g[gui.size()] = '\0';
+                              strcpy(read_msg_.ca.g, g);
+                            }
+                          }
                       }
 
                       do_read_body(); 

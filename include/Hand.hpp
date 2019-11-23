@@ -25,6 +25,7 @@ class Hand
         {
             inHand.push_back(C);
             handValue+=C.getValue();
+            checkHand();
             count++;
         }
         void clear()
@@ -42,6 +43,7 @@ class Hand
         }
         int getTotal()
         {
+            checkHand();
             return handValue;
         }
         bool isBust()
