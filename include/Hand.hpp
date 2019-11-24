@@ -24,9 +24,8 @@ class Hand
         void addCard(Card C)
         {
             inHand.push_back(C);
-            handValue+=C.getValue();
-            checkHand();
             count++;
+            aceInHand();
         }
         void clear()
         {
@@ -43,12 +42,16 @@ class Hand
         }
         int getTotal()
         {
-            checkHand();
-            return handValue;
+            int total = 0;
+            for(auto card : inHand)
+            {
+                total += card.getValue();
+            }
+            return total;
         }
         bool isBust()
         {
-            checkHand();
+            aceInHand();
             if(getTotal() > 21)
             {
                 return true;
@@ -63,24 +66,23 @@ class Hand
         }
         void checkHand()
         {
-            if ( handValue > 21 && aceInHand() ) 
-                handValue -= 10; // whole hand value
+            aceInHand();
+            //if ( handValue > 21 && aceInHand() ) 
+                //handValue -= 10; // whole hand value
         }
         // if there is an Ace in the Hand, value will change from 11 to 1 for Ace
-        bool aceInHand()
+        void aceInHand()
         {
-            bool result = false;
-            Card C;
-            for(int i=0; i < inHand.size(); i++)
+            int size = inHand.size();
+            if(getTotal() <= 21)
+                return;
+            for(int i=0; i < size; i++)
             {
-                C = inHand[i];
-                if(C.getValue() == 11)
+                if(inHand[i].getValue() == 11)
                 {
-                    C.setValue(1); // card 1
-                    result = true;
+                    inHand[i].setValue(1);
                 }
             }
-            return result;
         }
         void printHand()
         {

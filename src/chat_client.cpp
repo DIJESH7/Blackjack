@@ -255,25 +255,26 @@ int main(int argc, char* argv[])
     std::memcpy(msg.body(), line, msg.body_length());
 
     // testing
-    std::cout << "Play? y/n" << std::endl;
     char ans;
-    std::cin >> ans;
-
-    if (ans == 'y')
+    do
     {
-        std::cout << "Bet amount? [max 3, min 1]" << std::endl;
-        int amount;
-        //TODO check for min and max input
-        std::cin >> amount;
-        msg.ca.bet = amount;
-        Card temp;
-
-        //start dealing
-        msg.ca.play = true;
-        msg.ca.id = c->get_id();
-        msg.encode_header();
-        c->write(msg);
+        std::cout << "Play? y/n" << std::endl;
+        std::cin >> ans;
     }
+    while(ans != 'y');
+
+    std::cout << "Bet amount? [max 3, min 1]" << std::endl;
+    int amount;
+    //TODO check for min and max input
+    std::cin >> amount;
+    msg.ca.bet = amount;
+    Card temp;
+
+    //start dealing
+    msg.ca.play = true;
+    msg.ca.id = c->get_id();
+    msg.encode_header();
+    c->write(msg);
 
     std::thread t2([&](){ app->run(*win); });
 

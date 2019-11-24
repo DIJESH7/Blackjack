@@ -88,7 +88,7 @@ class chat_participant
         //but this cannot work for reference...
         bool checkBust()
         {
-            std::cout << "HERE\n " << getCurrentHand().isBust() << std::endl;
+            std::cout << "HEREn " << getCurrentHand().isBust() << std::endl;
             std::cout << getCurrentHand().getTotal() << std::endl;
             return getCurrentHand().isBust();
         }
@@ -542,7 +542,6 @@ class chat_session
 
                     read_msg_.ca.turn = turn;
                     read_msg_.encode_header(); // save info in msg to be sent to client
-                    std::cout << "Here\n" << read_msg_.ca.turn << std::endl;
                     room_.deliver(read_msg_); // deliver msg to all clients
 
 
