@@ -658,22 +658,27 @@ int main(int argc, char* argv[])
         double seconds_expire = 10;
         while(true)
         {
+            usleep(1000000);//sleep for 1 second to reduce memory consumption
             if(servers.front().numPlayers() >= 1)
             {
                 //start the clock when one player joins
-                clock_t start = clock();
-                while(true) 
-                {
-                    seconds_passed = (clock() - start)/CLOCKS_PER_SEC;
-                    if(seconds_passed > seconds_expire)
-                    {
-                        std::cout << "Expired" << std::endl;
-                        inplay = true;
-                        servers.front().start_play();
-                        break;
-                    }
-                }
+                //clock_t start = clock();
+                //while(true) 
+                //{
+
+                usleep(10000000);//sleep for 10 seconds
+                //seconds_passed = (clock() - start)/CLOCKS_PER_SEC;
+                //if(seconds_passed > seconds_expire)
+                //{
+
+                std::cout << "Expired" << std::endl;
+                inplay = true;
+                servers.front().start_play();
                 break;
+
+                //}
+                //}
+                //break;
             }
         }
         //io_context.run();
