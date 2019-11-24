@@ -9,8 +9,8 @@ all:$(TARGETS)
 server: src/chat_server.cpp include/chat_message.hpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $< -lpthread -g -Wall
 
-client: UI_Interface.o BJD.o BJP.o chat_client.o
-	$(CXX) $(CXXFLAGS) -o client UI_Interface.o BJD.o BJP.o chat_client.o $(GTKFLAGS) -g -Wall
+client: UI_Interface.o chat_client.o
+	$(CXX) $(CXXFLAGS) -o client UI_Interface.o chat_client.o $(GTKFLAGS) -g -Wall
 
 chat_client.o : src/chat_client.cpp include/chat_message.hpp include/controller.h
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -lpthread $(GTKFLAGS) -g -Wall 
@@ -21,11 +21,11 @@ UI_Interface.o : src/UI_Interface.cpp include/*.h
 #controller.o : src/controller.cpp include/*.h
 #	$(CXX) $(CXXFLAGS) -c src/controller.cpp $(GTKFLAGS) -g -Wall
 
-BJD.o : src/BJD.cpp include/*.h
-	$(CXX) $(CXXFLAGS) -c src/BJD.cpp $(GTKFLAGS) -g -Wall
+#BJD.o : src/BJD.cpp include/*.h
+#	$(CXX) $(CXXFLAGS) -c src/BJD.cpp $(GTKFLAGS) -g -Wall
 
-BJP.o : src/BJP.cpp include/*.h
-	$(CXX) $(CXXFLAGS) -c src/BJP.cpp $(GTKFLAGS) -g -Wall
+#BJP.o : src/BJP.cpp include/*.h
+#	$(CXX) $(CXXFLAGS) -c src/BJP.cpp $(GTKFLAGS) -g -Wall
 
 clean:
 	-rm -f *.o *.gch *~ $(TARGETS)

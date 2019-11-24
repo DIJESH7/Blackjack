@@ -172,14 +172,19 @@ Controller::Controller()
 
 }
 
+Controller::~Controller()
+{
+    
+}
+
 void Controller::hit()
 {
-    char line[chat_message::max_body_length + 1];
+    //char line[chat_message::max_body_length + 1];
     //std::strcpy(line, "garbage");
     chat_message msg;
 
-    msg.body_length(std::strlen(line));
-    std::memcpy(msg.body(), line, msg.body_length());
+    msg.body_length(0);
+    //std::memcpy(msg.body(), line, msg.body_length());
 
     // hitting 1 card
     msg.ca.hit = true;
@@ -192,12 +197,12 @@ void Controller::hit()
 
 void Controller::split()
 {
-    char line[chat_message::max_body_length + 1];
+    //char line[chat_message::max_body_length + 1];
     //std::strcpy(line, "garbage");
     chat_message msg;
 
-    msg.body_length(std::strlen(line));
-    std::memcpy(msg.body(), line, msg.body_length());
+    msg.body_length(0);
+    //std::memcpy(msg.body(), line, msg.body_length());
 
     msg.ca.hit = false;
     msg.ca.split = true;
@@ -211,12 +216,12 @@ void Controller::split()
 void Controller::stand()
 {
     std::cout << "Called" << std::endl;
-    char line[chat_message::max_body_length + 1];
+    //char line[chat_message::max_body_length + 1];
     //std::strcpy(line, "garbage");
     chat_message msg;
 
-    msg.body_length(std::strlen(line));
-    std::memcpy(msg.body(), line, msg.body_length());
+    msg.body_length(0);
+    //std::memcpy(msg.body(), line, msg.body_length());
 
     msg.ca.hit = false;
     msg.ca.stand = true;
@@ -250,9 +255,9 @@ int main(int argc, char* argv[])
     chat_message msg;
     msg.ca.client_credits = 100;
 
-    char line[chat_message::max_body_length + 1];
-    msg.body_length(std::strlen(line));
-    std::memcpy(msg.body(), line, msg.body_length());
+    //char line[chat_message::max_body_length + 1];
+    //msg.body_length(std::strlen(line));
+    //std::memcpy(msg.body(), line, msg.body_length());
 
     // testing
     char ans;
@@ -288,6 +293,8 @@ int main(int argc, char* argv[])
     //{
     //  std::cerr << "Exception: " << e.what() << "\n";
     //}
-
+    delete c;
+    delete controller;
+    delete win;
     return 0;
 }
