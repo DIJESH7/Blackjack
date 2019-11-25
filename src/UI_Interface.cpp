@@ -83,28 +83,37 @@ void UI_Interface::on_new_clicked()
 
 void UI_Interface::set_id(int id)
 {
+    gtk_mutex.lock();
     UI_Interface::pid = id;
+    gtk_mutex.unlock();
 }
 
 void UI_Interface::hit_button_pressed()
 {
+    gtk_mutex.lock();
     UI_Interface::controller->hit();
+    gtk_mutex.unlock();
 }
 
 void UI_Interface::stand_button_pressed()
 {
+    gtk_mutex.lock();
     std::cout << "Called" << std::endl;
     UI_Interface::controller->stand();
+    gtk_mutex.unlock();
 }
 
 void UI_Interface::split_button_pressed()
 {
+    gtk_mutex.lock();
     UI_Interface::controller->split();
+    gtk_mutex.unlock();
 
 }
 
 void UI_Interface::redraw(std::string data, int turn, bool split)
 {
+    gtk_mutex.lock();
     std::cout << turn << " Turn " << std::endl;
     if(turn != UI_Interface::pid)
     {
@@ -176,12 +185,14 @@ void UI_Interface::redraw(std::string data, int turn, bool split)
 		//set_from_resource
             }
         }
+        gtk_mutex.unlock();
         draw();
     }
 }
 
 void UI_Interface::draw()
 {
+    gtk_mutex.lock();
     int prev = 0;
     int i = 1;
     labels.clear();
@@ -223,4 +234,5 @@ void UI_Interface::draw()
     std::cout << "Almost there" << std::endl;
     vbox->show_all();
     std::cout << "Reached end" << std::endl;
+    gtk_mutex.unlock();
 }
