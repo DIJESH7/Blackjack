@@ -89,6 +89,7 @@ class chat_client
                       if (!ec && read_msg_.decode_header())
                       {
                         //system("clear");
+			gdk_threads_enter();
                         if(!gotId) //runs only first time
                         {
                           id = read_msg_.ca.id;
@@ -101,6 +102,7 @@ class chat_client
                         std::cout << read_msg_.ca.g << std::endl;
                         do_read_body();
                         storeData();
+			gdk_threads_leave();
                       }
                       else
                       {
@@ -234,8 +236,9 @@ void Controller::stand()
 int main(int argc, char* argv[])
 {
 
+    gdk_threads_init();
     auto app = Gtk::Application::create("");
-    //gtk_init( &argc, &argv);
+    gtk_init( &argc, &argv);
     if (argc != 3)
     {
         std::cerr << "Usage: chat_client <host> <port>\n";
