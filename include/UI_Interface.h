@@ -23,9 +23,8 @@ class UI_Interface : public Gtk::Window
         void redraw(std::string data, int turn, bool split);
 
     private:
-    std::multimap<int, Gtk::Image*> images;
+    std::vector<struct storage > _container;
     std::vector<int> ids;
-    //std::vector<Gtk::Image*> Cards;
     int pid;
     Gtk::Statusbar* statusbar;
     std::vector<Gtk::Label*> labels;
@@ -34,6 +33,20 @@ class UI_Interface : public Gtk::Window
     Gtk::Grid *grid;
     Gtk::MenuBar *menubar;
     Controller* controller;
-    std::mutex gtk_mutex;
+    Gtk::Label * status_label;
 
+};
+
+struct storage
+{
+    int id;
+    int hid;
+    Gtk::Image* image;
+
+    storage(int id_, int hid_, Gtk::Image* image_)
+    {
+        id = id_;
+        hid = hid_;
+        image = image_;
+    }
 };

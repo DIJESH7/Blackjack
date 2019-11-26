@@ -51,16 +51,30 @@ UI_Interface::UI_Interface(Controller* controller)
     Gtk::Label *d_info = Gtk::manage(new Gtk::Label());
     d_info->set_label("Dealer :");
     grid->attach(*d_info,0,0,1,1);
-    grid->attach(*hit_button,6,3,1,1);
-    grid->attach(*stand_button,7,3,1,1);
-    grid->attach(*split_button,7,4,1,1);
-    grid->attach(*leave_button,8,3,1,1);
+    //grid->attach(*hit_button,6,3,1,1);
+    //grid->attach(*stand_button,7,3,1,1);
+    //grid->attach(*split_button,7,4,1,1);
+    //grid->attach(*leave_button,8,3,1,1);
 
     grid->set_row_spacing(10);
     grid->set_column_spacing(10); 
 
     vbox->add(*grid);
+    Gtk::HBox * hbox = Gtk::manage(new Gtk::HBox());
+    hbox->add(*hit_button);
+    hbox->add(*stand_button);
+    hbox->add(*split_button);
+    hbox->add(*leave_button);
+    vbox->add(*hbox);
 
+    Gtk::Scrollbar * scrollbar = Gtk::manage(new Gtk::Scrollbar());
+
+    //vbox->add(*scrollbar);
+    statusbar = Gtk::manage(new Gtk::Statusbar);
+    status_label = Gtk::manage(new Gtk::Label());
+    status_label->set_label("Waiting for players to join");
+    statusbar->set_center_widget(*status_label);
+    vbox->add(*statusbar);
     vbox->show_all();
     //hit_button->hide();
     //stand_button->hide();
@@ -83,43 +97,40 @@ void UI_Interface::on_new_clicked()
 
 void UI_Interface::set_id(int id)
 {
-    gtk_mutex.lock();
     UI_Interface::pid = id;
-    gtk_mutex.unlock();
 }
 
 void UI_Interface::hit_button_pressed()
 {
-    gtk_mutex.lock();
     UI_Interface::controller->hit();
-    gtk_mutex.unlock();
 }
 
 void UI_Interface::stand_button_pressed()
 {
-    gtk_mutex.lock();
     std::cout << "Called" << std::endl;
     UI_Interface::controller->stand();
-    gtk_mutex.unlock();
 }
 
 void UI_Interface::split_button_pressed()
 {
-    gtk_mutex.lock();
     UI_Interface::controller->split();
-    gtk_mutex.unlock();
 
 }
 
 void UI_Interface::redraw(std::string data, int turn, bool split)
 {
-    gtk_mutex.lock();
     std::cout << turn << " Turn " << std::endl;
     if(turn != UI_Interface::pid)
     {
         for(auto button : UI_Interface::buttons)
         {
             button->set_sensitive(false);
+            if(turn == -1)
+                status_label->set_label("Dealer's Turn");
+            else if(turn == 0)
+                status_label->set_label("Waiting for players to join");
+            else
+                status_label->set_label("Player " + std::to_string(turn) + " Turn");
         }
     }
     else if(turn == UI_Interface::pid)
@@ -128,6 +139,7 @@ void UI_Interface::redraw(std::string data, int turn, bool split)
         {
             std::cout << "Called buttons: "<< button << std::endl; 
             button->set_sensitive(true);
+            status_label->set_label("Your Turn");
         }
     }
     std::cout << "Got here" << std::endl;
@@ -137,14 +149,19 @@ void UI_Interface::redraw(std::string data, int turn, bool split)
     if(data.length() >= 5) //used 5 just in case of some escaped \0 or \n or ' '
     {
         std::cout << "CALLED: :" << std::endl;
-        for (auto image : images)
+        for (auto c : _container)
         {
-            std::cout << image.second << std::endl;
-            grid->remove(*(image.second));
-            delete (image.second); //destroy those images; they can overlap
+            grid->remove(*(c.image));
+            delete (c.image); //destroy those images; they can overlap
             //if left alone
         }
-        images.clear(); //clear up vector
+        for ( auto l : labels)
+        {
+            grid->remove(*l);
+            delete l;
+        }
+        _container.clear(); //clear up vector
+        labels.clear();
         ids.clear();
         std::stringstream ss(data);//convert string to sstream
         int id = 0;
@@ -180,59 +197,67 @@ void UI_Interface::redraw(std::string data, int turn, bool split)
                 token = token.substr(0,5); //substr to remove trailing spaces
                 s += token;
                 s += ".jpg";
-                std::cout << s << std::endl;
-                images.insert(pair<int, Gtk::Image*>(id, Gtk::manage(new Gtk::Image(s))));
-		//set_from_resource
+                std::cout << s << " " << hid << std::endl;
+                //images.insert(pair<int, Gtk::Image*>(id, Gtk::manage(new Gtk::Image(s))));
+                _container.push_back(storage(id, hid, Gtk::manage(new Gtk::Image(s))));
             }
         }
-        gtk_mutex.unlock();
         draw();
     }
 }
 
 void UI_Interface::draw()
 {
-    gtk_mutex.lock();
+    int column = 0;
     int prev = 0;
+    int lastHand = 0;
     int i = 1;
     labels.clear();
 
-    for (const auto& image : images)
+    for (const auto& c : _container)
     {
-        //image.first is player id
-        if(prev != image.first)
+        //c.id is player id
+        std::cout << c.id << c.hid << prev << std::endl;
+        if(prev != c.id)
         {
-            if(image.first != 0) //if not dealer
+            if(c.id != 0) //if not dealer
             {
+                column++;
                 Gtk::Label *p_info = Gtk::manage(new Gtk::Label());
                 std::string info = "Player: ";
-                info += std::to_string(image.first);
-                if(image.first == UI_Interface::pid)
+                info += std::to_string(c.id);
+                if(c.id == UI_Interface::pid)
                 {
                     info = "Yours: ";
                 }
                 p_info->set_label(info);
-                grid->attach(*p_info,image.first,1,1,1);
-                prev = image.first;
+                labels.push_back(p_info);
+                grid->attach(*p_info,column,1,1,1);
                 i = 1;
+                lastHand = c.hid;
             }
             else
             {
                 i = 0;
             }
+            prev = c.id;
         }
-        if(image.first == 0) //dealer
+        else if(lastHand != c.hid)
+        {
+            column++;
+            lastHand = c.hid;
+            i = 1;
+        }
+        if(c.id == 0) //dealer
         {
             //attach horizontally
-            grid->attach(*(image.second), i++, image.first, 1, 1);
+            grid->attach(*(c.image), ++i, c.id, 1, 1);
         }
         else
         {
-            grid->attach(*(image.second), image.first, ++i, 1, 1);
+            grid->attach(*(c.image), column, ++i, 1, 1);
         }
     }
-    std::cout << "Almost there" << std::endl;
     vbox->show_all();
     std::cout << "Reached end" << std::endl;
-    gtk_mutex.unlock();
 }

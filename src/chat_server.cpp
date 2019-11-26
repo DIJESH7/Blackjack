@@ -66,8 +66,8 @@ class chat_participant
             int i = 0;
             for(auto hand : playerHand)
             {
-                result += hand.printAllHand(id);
                 result += "hand: " + std::to_string(i++) + "\n";
+                result += hand.printAllHand(id);
             }
             return result;
         }
