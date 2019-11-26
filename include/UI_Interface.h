@@ -34,6 +34,5 @@ class UI_Interface : public Gtk::Window
     Gtk::Grid *grid;
     Gtk::MenuBar *menubar;
     Controller* controller;
-    std::mutex gtk_mutex;
 
 };
