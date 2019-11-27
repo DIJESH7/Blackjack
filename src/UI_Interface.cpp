@@ -44,6 +44,7 @@ UI_Interface::UI_Interface(Controller* controller)
     Gtk::Button *split_button = Gtk::manage(new Gtk::Button("SPLIT"));
     split_button->signal_clicked().connect([this] { this->split_button_pressed(); });
     Gtk::Button *leave_button = Gtk::manage(new Gtk::Button("LEAVE"));
+    leave_button->signal_clicked().connect([this] { this->leave_button_pressed(); });
     buttons.push_back(stand_button);
     buttons.push_back(double_button);
     buttons.push_back(split_button);
@@ -107,14 +108,17 @@ void UI_Interface::hit_button_pressed()
 
 void UI_Interface::stand_button_pressed()
 {
-    std::cout << "Called" << std::endl;
     UI_Interface::controller->stand();
 }
 
 void UI_Interface::split_button_pressed()
 {
     UI_Interface::controller->split();
+}
 
+void UI_Interface::leave_button_pressed()
+{
+    UI_Interface::controller->leave();
 }
 
 void UI_Interface::redraw(std::string data, int turn, bool split)
@@ -141,6 +145,9 @@ void UI_Interface::redraw(std::string data, int turn, bool split)
             button->set_sensitive(true);
             status_label->set_label("Your Turn");
         }
+        std::cout << "SPLIT: " << split << std::endl;
+        if(!split)
+            buttons[3]->set_sensitive(false);
     }
     std::cout << "Got here" << std::endl;
     //only destroy and refresh if there
@@ -166,7 +173,6 @@ void UI_Interface::redraw(std::string data, int turn, bool split)
         std::stringstream ss(data);//convert string to sstream
         int id = 0;
         int hid = 0;
-        int i = 0;
 
         while(true)
         {

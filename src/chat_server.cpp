@@ -335,6 +335,9 @@ class chat_room
                 {
                     participant->play = true;
                 }
+            }
+            for (auto participant : participants_)
+            {
                 if(!participant->play)
                 {
                     return false;
@@ -347,6 +350,8 @@ class chat_room
         {
             chat_message handshake;
             handshake.ca.turn = pturn;
+            handshake.ca.split_button = canBeSplit(pturn);
+            std::cout << "HERE :\n\n\n\t\t " << handshake.ca.split_button << std::endl;
             turn = pturn;
             std::cout << "Got here" << std::endl;
             handshake.encode_header();
@@ -355,6 +360,33 @@ class chat_room
             {
                 participant->deliver(handshake);
             }
+        }
+
+        bool idInVector(int id)
+        {
+            for (auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    printf("Id: %d\n\n\n\n", participant->id);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        int getLastId()
+        {
+            int i = 0;
+            for (auto participant : participants_)
+            {
+                if(i == sizeOfParticipants() - 1)
+                {
+                    return participant->id;
+                }
+                i++;
+            }
+            return -1;
         }
 
         bool setNextHand(int id)
@@ -466,7 +498,6 @@ class chat_session
                           std::copy(gui.begin(), gui.end(), g);
                           g[gui.size()] = '\0';
                           strcpy(read_msg_.ca.g, g);
-			  read_msg_.ca.split_button = room_.canBeSplit(read_msg_.ca.id);
                       }
 
                       if(read_msg_.ca.hit == true)
@@ -485,7 +516,6 @@ class chat_session
                       else if(read_msg_.ca.split == true)
                       {
                           room_.splitHand(read_msg_.ca.id);
-			  read_msg_.ca.split_button = room_.canBeSplit(read_msg_.ca.id);
                           std::string gui = room_.stringOfCards();
                           bool busted = room_.check_points(read_msg_.ca.id);
 
@@ -496,15 +526,44 @@ class chat_session
                           if(busted)
                             read_msg_.ca.stand = true;
                       }
+                      else if(read_msg_.ca.leave == true)
+                      {
+                          if(turn == read_msg_.ca.id) //left when it was his turn
+                          {
+                            read_msg_.ca.stand = true;
+                          }
+                          else if(turn == 0) //left when people were still joining
+                          {
+                            
+                          }
+                          else if(turn == -1) //left when dealer was taking his turn
+                          {
+                            
+                          }
+                          else if(read_msg_.ca.id > turn) //left before taking his turn
+                          {
+                            
+                          }
+                          else if(read_msg_.ca.id < turn) //left after taking his turn
+                          {
+
+                          }
+                          room_.leave(shared_from_this());
+                      }
 
                       if(read_msg_.ca.stand == true)
                       {
                           //if setNextHand true, it sets player hand to next hand
                           if(!room_.setNextHand(read_msg_.ca.id))
                           {
-                            if(turn < room_.sizeOfParticipants())
+                            if(turn < room_.getLastId())
                             {
                               turn++;
+                              //keep incrementing turn while id is not in vector
+                              while(!room_.idInVector(turn))
+                              {
+                                turn++;
+                              }
                             }
                             else
                             {
@@ -541,6 +600,7 @@ class chat_session
                     {
 
                     read_msg_.ca.turn = turn;
+		    read_msg_.ca.split_button = room_.canBeSplit(read_msg_.ca.id);
                     read_msg_.encode_header(); // save info in msg to be sent to client
                     room_.deliver(read_msg_); // deliver msg to all clients
 

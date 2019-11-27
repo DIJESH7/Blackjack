@@ -13,15 +13,15 @@ public:
   {
 
   }
-  /*
-  Card(Rank rank, Suit suit)
+
+  Card(char rank, char suit)
   {
       rank_ = rank;
       suit_ = suit;
       isFaceUp = false;
   }
 
-
+  /*
   void display() 
   {
       const char * rankText[] = { " ", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King" };

@@ -153,6 +153,7 @@ class chat_client
         void storeData()
         {
             std::string data(read_msg_.ca.g);
+            std::cout << "HERE :\n\n\n\t\t " << read_msg_.ca.split_button << std::endl;
             win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button);
         }
     private:
@@ -231,6 +232,23 @@ void Controller::stand()
     msg.ca.play = false;
     msg.encode_header();
     c->write(msg);
+}
+
+void Controller::leave()
+{
+    chat_message msg;
+
+    msg.body_length(0);
+
+    msg.ca.hit = false;
+    msg.ca.stand = false;
+    msg.ca.split = false;
+    msg.ca.id = c->get_id();
+    msg.ca.play = false;
+    msg.ca.leave = true;
+    msg.encode_header();
+    c->write(msg);
+    exit(0);
 }
 
 int main(int argc, char* argv[])

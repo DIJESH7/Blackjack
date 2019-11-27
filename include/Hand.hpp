@@ -108,11 +108,11 @@ class Hand
 
         bool canSplit()
         {
-            //if(inHand.size() != 2)
-            //    return false;
+            if(inHand.size() != 2)
+                return false;
 
-            //if(inHand[0].getRank() != inHand[1].getRank())
-            //    return false;
+            if(inHand[0].getRank() != inHand[1].getRank())
+                return false;
 
             return true;
         }

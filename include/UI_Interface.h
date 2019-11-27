@@ -15,7 +15,7 @@ class UI_Interface : public Gtk::Window
         void stand_button_pressed();
         void doubleDown_button_pressed();
         void split_button_pressed();
-        void exit_button_pressed();
+        void leave_button_pressed();
         void on_button_clicked();
         void on_new_clicked();
         void set_id(int id);

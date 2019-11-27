@@ -9,6 +9,7 @@ class Controller
         void stand();
         void doubleDown();
         void split();
+        void leave();
         ~Controller();
 
     private:
