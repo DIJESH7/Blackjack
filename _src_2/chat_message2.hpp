@@ -50,6 +50,7 @@ class client_action
   char name[25];
   bool bet;
   bool ready;
+  bool op;
 
   bool checkHit = true;
   bool checkStand = true;

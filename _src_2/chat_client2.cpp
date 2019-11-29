@@ -425,34 +425,36 @@ private:
                 }
                 
                 //system("clear");
-                std::cout << read_msg_.ca.g << std::endl;
-                std::cout << std::endl;
+            std::cout << read_msg_.ca.g << std::endl;
+            std::cout << std::endl;
+            if(read_msg_.ca.op){
                 std::cout << "Options ";
-            if(read_msg_.ca.checkHit == true)
-            {
-                std::cout << "(1)Hit ";
+                if(read_msg_.ca.checkHit == true)
+                {
+                    std::cout << "(1)Hit ";
+                }
+                if(read_msg_.ca.checkStand == true)
+                {
+                    std::cout << "(2)Stand ";
+                }
+                if(read_msg_.ca.checkDouble == true)
+                {
+                    std::cout << "(3)Double Down ";
+                }
+                if(read_msg_.ca.checkSplit == true)
+                {
+                    std::cout << "(4)Split ";
+                }
+                if(read_msg_.ca.checkInsure == true)
+                {
+                    std::cout << "(6)Insure Bet ";
+                }
+                if(read_msg_.ca.checkLeave == true)
+                {
+                    std::cout << "(7)Leave ";
+                }
+                std::cout << "\n";
             }
-            if(read_msg_.ca.checkStand == true)
-            {
-                std::cout << "(2)Stand ";
-            }
-            if(read_msg_.ca.checkDouble == true)
-            {
-                std::cout << "(3)Double Down ";
-            }
-            if(read_msg_.ca.checkSplit == true)
-            {
-                std::cout << "(4)Split ";
-            }
-            if(read_msg_.ca.checkInsure == true)
-            {
-                std::cout << "(6)Insure Bet ";
-            }
-            if(read_msg_.ca.checkLeave == true)
-            {
-                std::cout << "(7)Leave ";
-            }
-            std::cout << "\n";
                 
 
                 do_read_header();

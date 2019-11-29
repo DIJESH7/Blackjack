@@ -457,6 +457,7 @@ private:
                         self->setblackjack(true);
                     }
                     cards_dealt = true;
+                    read_msg_.ca.op = true;
                 
 
 
@@ -468,6 +469,7 @@ private:
                     {
                     std::cout << "Asking for insurance bet." << std::endl;
                     read_msg_.gs.askinsurance = true;
+
                     }
                 }
                 
@@ -477,6 +479,8 @@ private:
                     std::cout << "hit success" << std::endl;
                     read_msg_.ca.checkDouble = false;
                     read_msg_.ca.checkSplit = false;
+                    read_msg_.ca.op = true;
+                    
                 }
 
 
