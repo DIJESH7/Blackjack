@@ -208,10 +208,6 @@ public:
         }
         dealerHand_.clear();
         dealer_has_blackjack_ = false;
-        //join countdown
-        //bet countdown
-        //turn countdown
-        //continue countdown
 
     }
 
@@ -342,8 +338,10 @@ public:
 
     Card dealerShownCard() 
     {
-        return dealerHand_.getCard(0);
+        return dealerHand_.inHand[0];
     }
+
+
 
 
    
@@ -435,6 +433,7 @@ private:
                 read_msg_.gs.player_cards_valid = false;
 
 
+
                 if(read_msg_.ca.join) // fix so that one client doesn't start the game
                 {
                     std::cout << "the name is " << read_msg_.ca.name << std::endl;
@@ -457,22 +456,39 @@ private:
                         std::cout << "Player has blackjack!" << std::endl;
                         self->setblackjack(true);
                     }
+                    cards_dealt = true;
+                
+
+
                     
                 }
-                if(table.dealerShownCard().getRank() == 'A' && read_msg_.ca.insurance = false) 
-                {
+                if(cards_dealt)
+                {                
+                    if(room_.dealerShownCard().getRank() == 'A' && (read_msg_.gs.askinsurance == false) ) 
+                    {
                     std::cout << "Asking for insurance bet." << std::endl;
-                    read_msg_.ga.askinsurance = true;
+                    read_msg_.gs.askinsurance = true;
+                    }
                 }
-
-                if(read_msg_.ca.hit)
-                {
-
-
-                }
-
                 
-                //std::string gui = room_.stringOfCards();
+                if(read_msg_.ca.hit == true)
+                {
+                    self->addCardToPlayerHand(room_.dealCard());
+                    std::cout << "hit success" << std::endl;
+                    read_msg_.ca.checkDouble = false;
+                    read_msg_.ca.checkSplit = false;
+                }
+
+
+
+
+
+
+
+
+
+
+
                 std::string gui = room_.displayCards();
                 std::cout << gui << std::endl;
                 char g[gui.size() +1 ];
@@ -480,12 +496,6 @@ private:
                 g[gui.size()] = '\0';
                 strcpy(read_msg_.ca.g, g);
                 
-
-
-
-                  
-                //room_.deliver(read_msg_, id); // can send to specific client
-
 
                 read_msg_.encode_header(); // save info in msg to be sent to client
                 room_.deliver(read_msg_); // deliver msg to all clients
@@ -525,6 +535,7 @@ private:
     chat_room& room_;
     chat_message read_msg_;
     chat_message_queue write_msgs_;
+    bool cards_dealt = false;
 
 };
 

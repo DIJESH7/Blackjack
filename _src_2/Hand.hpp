@@ -144,7 +144,7 @@ public:
         return result;
     }
 
-    std::vector<Card>inHand; //deque<Card>inHand;
+    std::vector<Card> inHand; //deque<Card>inHand;
     
 
     int handValue = 0;

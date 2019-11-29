@@ -427,6 +427,32 @@ private:
                 //system("clear");
                 std::cout << read_msg_.ca.g << std::endl;
                 std::cout << std::endl;
+                std::cout << "Options ";
+            if(read_msg_.ca.checkHit == true)
+            {
+                std::cout << "(1)Hit ";
+            }
+            if(read_msg_.ca.checkStand == true)
+            {
+                std::cout << "(2)Stand ";
+            }
+            if(read_msg_.ca.checkDouble == true)
+            {
+                std::cout << "(3)Double Down ";
+            }
+            if(read_msg_.ca.checkSplit == true)
+            {
+                std::cout << "(4)Split ";
+            }
+            if(read_msg_.ca.checkInsure == true)
+            {
+                std::cout << "(6)Insure Bet ";
+            }
+            if(read_msg_.ca.checkLeave == true)
+            {
+                std::cout << "(7)Leave ";
+            }
+            std::cout << "\n";
                 
 
                 do_read_header();
@@ -514,15 +540,12 @@ int main(int argc, char* argv[])
         std::cin >> pname;
 
         std::cout << "\nPlayer joining..." << std::endl;
-        char ans;
-        std::cout << "Press enter to play." << std::endl;
-        cin.get(ans);
+       
 
         
             chat_message msg;
             msg.body_length(0);
             msg.ca.join = true;
-            msg.ca.name_valid = true;
             if(pname.length() < 25)
             {
                 char temp[pname.size() +1];
@@ -534,7 +557,6 @@ int main(int argc, char* argv[])
             assert(c);
             c->write(msg); // sends name
 
-            msg.ca.name_valid = false;
             msg.ca.join = false;
             usleep(100000);
 
@@ -547,24 +569,29 @@ int main(int argc, char* argv[])
             c->write(msg); // sends bet
 
             msg.ca.bet = false;
+      
         
-        //chat_message msg;
-        msg.ca.askedinsurance = false;
+/*
+        bool checkHit = true;
+        bool checkStand = true;
+        bool checkDouble = true;
+        bool checkSplit = true;
+        bool checkInsure = true;
+*/
+
         int choice = -1;
         while(choice != 0)
         {
-            //chat_message msg;
             msg.ca.hit = false;
             msg.ca.stand = false;
             msg.ca.doubledown = false;
             msg.ca.split = false;
             msg.ca.surrender = false;
             msg.ca.insurance = false;
-            if(msg.gs.askinsurance == true)
-            {
-                std::cout << "Dealer has 'A'... Press 6 to insure." << std::endl; 
-            }
-            std::cout << "Options (1)hit (2)stand (3)double (4)split (5)surrender (6)insurance (0)leave" << std::endl;
+
+            
+
+            //std::cout << "Options (1)hit (2)stand (3)double (4)split (5)surrender (6)insurance (0)leave" << std::endl;
             std::cin >> choice;
             std::cerr << "---> button pressed: " << choice << std::endl;
             msg.body_length (0);
@@ -602,8 +629,6 @@ int main(int argc, char* argv[])
                     msg.encode_header();
                     c->write(msg);
             }
-            msg.encode_header();
-            c->write(msg);
         }
                 
 

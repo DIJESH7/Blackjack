@@ -35,8 +35,6 @@ class game_state
   int four;
   int five;
 
-  // note you can't use std::string 
-  // or pointers
 };
 
 class client_action
@@ -47,24 +45,20 @@ class client_action
   bool doubledown;
   bool split;
   bool surrender;
-  //bool insurance;
   int insurance;
   bool join;
-  bool name_valid;
   char name[25];
   bool bet;
   bool ready;
-  bool askedinsurance;
 
-  int one;
-  int two;
-  int three;
-  int four;
-  int five;
+  bool checkHit = true;
+  bool checkStand = true;
+  bool checkDouble=true;
+  bool checkSplit = false;
+  bool checkInsure = false;
+  bool checkLeave = false;
 
   bool leave;
-  bool first_card;
-  bool second_card;
   int id;
   int given_id;
   int client_credits;

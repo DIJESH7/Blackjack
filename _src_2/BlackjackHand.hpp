@@ -124,6 +124,11 @@ public:
         return result;
     }
 
+    virtual Card getCard2(int index)
+    {
+        return inHand[index];
+    }
+
 
 private:
     /*
