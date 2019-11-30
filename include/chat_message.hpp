@@ -45,6 +45,9 @@ class client_action
         bool first_card = false;
         bool second_card = false;
         int id = 0;
+        int active_hand = 0;
+        int handWins[24];
+        int size = 0;
         int given_id = 0;
         int client_credits = 0;
         int bet = 0;

@@ -121,7 +121,7 @@ void UI_Interface::leave_button_pressed()
     UI_Interface::controller->leave();
 }
 
-void UI_Interface::redraw(std::string data, int turn, bool split)
+void UI_Interface::redraw(std::string data, int turn, bool split, int * results, int size)
 {
     std::cout << turn << " Turn " << std::endl;
     if(turn != UI_Interface::pid)
@@ -141,21 +141,18 @@ void UI_Interface::redraw(std::string data, int turn, bool split)
     {
         for(auto button : UI_Interface::buttons)
         {
-            std::cout << "Called buttons: "<< button << std::endl; 
             button->set_sensitive(true);
             status_label->set_label("Your Turn");
         }
-        std::cout << "SPLIT: " << split << std::endl;
         if(!split)
             buttons[3]->set_sensitive(false);
     }
-    std::cout << "Got here" << std::endl;
+
     //only destroy and refresh if there
     //was any update  in the message
     std::cout << "LEN: " << data.length() << std::endl;
     if(data.length() >= 5) //used 5 just in case of some escaped \0 or \n or ' '
     {
-        std::cout << "CALLED: :" << std::endl;
         for (auto c : _container)
         {
             grid->remove(*(c.image));
@@ -196,19 +193,39 @@ void UI_Interface::redraw(std::string data, int turn, bool split)
             else
             {
                 s = "images/cards/";
-                std::cout << token << std::endl;
                 token = token.substr(0,1); //substr to remove trailing spaces
                 s += token;
                 std::getline(ss,token);
                 token = token.substr(0,5); //substr to remove trailing spaces
                 s += token;
                 s += ".jpg";
-                std::cout << s << " " << hid << std::endl;
                 //images.insert(pair<int, Gtk::Image*>(id, Gtk::manage(new Gtk::Image(s))));
                 _container.push_back(storage(id, hid, Gtk::manage(new Gtk::Image(s))));
             }
         }
         draw();
+    }
+    if(size > 0)
+    {
+        std::string wins = "";
+        int i;
+        for(i = 0; i < size; i++)
+        {
+            wins += "Hand#" + std::to_string(i) + " - ";
+            if(results[i] == -1)
+                wins += "Lost\n";
+            else if(results[i] == 1)
+                wins += "Won\n";
+            else if(results[i] == 2)
+                wins += "Draw, No bet deducted\n";
+            else
+                wins += "Game is not finished yet\n";
+        }
+        std::cout << wins << std::endl;
+        Gtk::MessageDialog* dialog = new Gtk::MessageDialog(*this, "Results", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
+        dialog->set_message(wins, false);
+        int r = dialog->run();
+        delete dialog;
     }
 }
 
@@ -223,7 +240,6 @@ void UI_Interface::draw()
     for (const auto& c : _container)
     {
         //c.id is player id
-        std::cout << c.id << c.hid << prev << std::endl;
         if(prev != c.id)
         {
             if(c.id != 0) //if not dealer
@@ -241,6 +257,8 @@ void UI_Interface::draw()
                 grid->attach(*p_info,column,1,1,1);
                 i = 1;
                 lastHand = c.hid;
+                //TODO: maybe put a background color or something to know
+                //which hand is active
             }
             else
             {
@@ -265,5 +283,4 @@ void UI_Interface::draw()
         }
     }
     vbox->show_all();
-    std::cout << "Reached end" << std::endl;
 }

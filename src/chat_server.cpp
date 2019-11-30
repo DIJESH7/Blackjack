@@ -88,8 +88,6 @@ class chat_participant
         //but this cannot work for reference...
         bool checkBust()
         {
-            std::cout << "HEREn " << getCurrentHand().isBust() << std::endl;
-            std::cout << getCurrentHand().getTotal() << std::endl;
             return getCurrentHand().isBust();
         }
 
@@ -109,7 +107,6 @@ class chat_participant
         {
             if(getCurrentHand().canSplit())
             {
-		std::cout << "called split" << std::endl;
                 Hand h;
                 playerHand.insert(playerHand.begin()+currentHand+1, h);
                 Card temp;
@@ -126,6 +123,16 @@ class chat_participant
 	{
 	    return getCurrentHand().canSplit();	
 	}
+
+        int getHandTotal(int idx)
+        {
+            if(idx >= playerHand.size())
+            {
+                return -1;
+            }
+            return playerHand[idx].getTotal();
+
+        }
 
 
         int id;
@@ -146,8 +153,6 @@ class Dealer : public chat_participant
         {
             std::string result;
             result = playerHand.printAllHand(id);
-            std::cout << result << std::endl;
-            std::cout << "reveal: " << reveal << std::endl;
             if(reveal == false)
             {
                 std::stringstream ss(result);
@@ -177,6 +182,11 @@ class Dealer : public chat_participant
                 temp = d.getCard();
                 pHand(temp);
             }
+        }
+
+        int getTotal()
+        {
+            return playerHand.getTotal();
         }
 
         void deliver(const chat_message& msg) {}
@@ -212,7 +222,6 @@ class chat_room
                 participants_.insert(participant);
                 handshake.ca.id = participant->id;
                 handshake.ca.turn = 0;
-                //strcpy(handshake.ca.g, "");
                 handshake.encode_header();
                 participant->deliver(handshake);
                 for (auto msg: recent_msgs_)
@@ -300,7 +309,6 @@ class chat_room
 
         bool check_points(int id)
         {
-            std::cout << "Called" << std::endl;
             for (auto participant : participants_)
             {
                 if(participant->id == id)
@@ -351,11 +359,8 @@ class chat_room
             chat_message handshake;
             handshake.ca.turn = pturn;
             handshake.ca.split_button = canBeSplit(pturn);
-            std::cout << "HERE :\n\n\n\t\t " << handshake.ca.split_button << std::endl;
             turn = pturn;
-            std::cout << "Got here" << std::endl;
             handshake.encode_header();
-            std::cout << "Got far" << std::endl;
             for (auto participant : participants_)
             {
                 participant->deliver(handshake);
@@ -368,7 +373,6 @@ class chat_room
             {
                 if(participant->id == id)
                 {
-                    printf("Id: %d\n\n\n\n", participant->id);
                     return true;
                 }
             }
@@ -423,6 +427,62 @@ class chat_room
             }
 	    return false;
 	}
+
+        void announceResults(int id)
+        {
+            int target = dealer->getTotal();
+            if(id == -1) //announce all
+            {
+                for (auto participant : participants_)
+                {
+                    handshake.ca.turn = turn;
+                    std::vector<int> v;
+                    int total = participant->getHandTotal(0);
+                    //in vector v / handWins
+                    // 0  = game in progress
+                    //-1  = lost
+                    // 1  = win
+                    int i = 1;
+
+                    while(total != -1)
+                    {
+
+                        //player Hand busts
+                        if(total > 21) 
+                            v.push_back(-1);
+                        //dealer busts
+                        else if(target > 21) 
+                            v.push_back(1);
+                        //dealer is closer to 21 than player
+                        else if(target > total) 
+                            v.push_back(-1);
+                        //tied
+                        else if(target == total)
+                            v.push_back(2);
+                        //player is closer to 21 than dealer
+                        else 
+                            v.push_back(1);
+
+                        total = participant->getHandTotal(i++);
+                    }
+                    std::copy(v.begin(), v.end(), handshake.ca.handWins);
+                    handshake.ca.size = v.size();
+                    handshake.encode_header();
+                    participant->deliver(handshake);
+                }
+                return;
+            }
+            //TODO complete for one person
+            //for (auto participant : participants_)
+            //{
+            //    if(participant->id == id)
+            //    {
+            //        participant->deliver(handshake);
+            //    }
+            //}
+
+        }
+
 
         Dealer* dealer;
 
@@ -576,6 +636,7 @@ class chat_session
                               std::copy(gui.begin(), gui.end(), g);
                               g[gui.size()] = '\0';
                               strcpy(read_msg_.ca.g, g);
+                              room_.announceResults(-1);
                             }
                           }
                       }

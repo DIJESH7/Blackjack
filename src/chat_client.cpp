@@ -99,7 +99,7 @@ class chat_client
                           std::cout << "Your Player id: "<< id << std::endl;
                         }
                         std::cout << std::endl;
-                        std::cout << read_msg_.ca.g << std::endl;
+                        //std::cout << read_msg_.ca.g << std::endl;
                         do_read_body();
                         storeData();
 			gdk_threads_leave();
@@ -153,8 +153,8 @@ class chat_client
         void storeData()
         {
             std::string data(read_msg_.ca.g);
-            std::cout << "HERE :\n\n\n\t\t " << read_msg_.ca.split_button << std::endl;
-            win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button);
+            std::cout << read_msg_.ca.size << " HEHHB" << std::endl;
+            win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.handWins, read_msg_.ca.size);
         }
     private:
         asio::io_context& io_context_;
@@ -218,7 +218,6 @@ void Controller::split()
 
 void Controller::stand()
 {
-    std::cout << "Called" << std::endl;
     //char line[chat_message::max_body_length + 1];
     //std::strcpy(line, "garbage");
     chat_message msg;
