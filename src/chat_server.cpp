@@ -472,17 +472,42 @@ class chat_room
                 }
                 return;
             }
-            //TODO complete for one person
-            //for (auto participant : participants_)
-            //{
-            //    if(participant->id == id)
-            //    {
-            //        participant->deliver(handshake);
-            //    }
-            //}
-
+        
         }
 
+        void set_bet(int id, int bet)
+        {
+            for(auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    participant->getCurrentHand().set_bet(bet);
+                }
+            }
+        }
+
+        void double_bet(int id)
+        {
+            for(auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    int bet = participant->getCurrentHand().get_bet();
+                    participant->getCurrentHand().set_bet(2*bet);
+                }
+            }
+        }
+
+        int get_bet(int id)
+        {
+            for(auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    return participant->getCurrentHand().get_bet();
+                }
+            }
+        }
 
         Dealer* dealer;
 
@@ -558,6 +583,7 @@ class chat_session
                           std::copy(gui.begin(), gui.end(), g);
                           g[gui.size()] = '\0';
                           strcpy(read_msg_.ca.g, g);
+                          room_.set_bet(read_msg_.ca.id, read_msg_.ca.bet);
                       }
 
                       if(read_msg_.ca.hit == true)
@@ -585,6 +611,17 @@ class chat_session
                           strcpy(read_msg_.ca.g, g);
                           if(busted)
                             read_msg_.ca.stand = true;
+                      }
+                      else if(read_msg_.ca.doubledown)
+                      {
+                          room_.double_bet(read_msg_.ca.id);  
+                          room_.giveCard(read_msg_.ca.id);
+                          std::string gui = room_.stringOfCards();
+                          char g[gui.size() +1 ];
+                          std::copy(gui.begin(), gui.end(), g);
+                          g[gui.size()] = '\0';
+                          strcpy(read_msg_.ca.g, g);
+                          read_msg_.ca.stand = true;
                       }
                       else if(read_msg_.ca.leave == true)
                       {
@@ -636,7 +673,6 @@ class chat_session
                               std::copy(gui.begin(), gui.end(), g);
                               g[gui.size()] = '\0';
                               strcpy(read_msg_.ca.g, g);
-                              room_.announceResults(-1);
                             }
                           }
                       }
@@ -662,9 +698,15 @@ class chat_session
 
                     read_msg_.ca.turn = turn;
 		    read_msg_.ca.split_button = room_.canBeSplit(read_msg_.ca.id);
+                    read_msg_.ca.bet = room_.get_bet(read_msg_.ca.id);
                     read_msg_.encode_header(); // save info in msg to be sent to client
                     room_.deliver(read_msg_); // deliver msg to all clients
-
+                    if(reveal)
+                    {
+                        usleep(500000); //sleep for half second
+                                         //give user chance to see the cards
+                        room_.announceResults(-1);
+                    }
 
                     //room_.deliver(read_msg_, id); // can send to specific client
 

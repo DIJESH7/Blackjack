@@ -7,7 +7,7 @@ class Controller
         Controller();
         void hit();
         void stand();
-        void doubleDown();
+        void doubledown();
         void split();
         void leave();
         ~Controller();

@@ -13,14 +13,14 @@ class UI_Interface : public Gtk::Window
         ~UI_Interface();
         void hit_button_pressed();
         void stand_button_pressed();
-        void doubleDown_button_pressed();
+        void doubledown_button_pressed();
         void split_button_pressed();
         void leave_button_pressed();
         void on_button_clicked();
         void on_new_clicked();
         void set_id(int id);
         void draw();
-        void redraw(std::string data, int turn, bool split, int * results, int size);
+        void redraw(std::string data, int turn, bool split, int * results, int size, int bet);
 
     private:
     std::vector<struct storage > _container;
@@ -34,6 +34,7 @@ class UI_Interface : public Gtk::Window
     Gtk::MenuBar *menubar;
     Controller* controller;
     Gtk::Label * status_label;
+    Gtk::Label * bet_label;
 
 };
 

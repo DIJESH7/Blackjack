@@ -124,10 +124,21 @@ class Hand
             return c;
         }
 
+        int get_bet()
+        {
+            return bet;
+        }
+
+        void set_bet(int bet_)
+        {
+            bet = bet_;
+        }
+
         std::vector<Card>inHand;
         //deque<Card>inHand;
         int handValue;
         int count;
         bool playing;
+        int bet;
 };
 

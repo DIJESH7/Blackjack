@@ -26,6 +26,9 @@ UI_Interface::UI_Interface(Controller* controller)
     menuitem_new->signal_activate().connect([this] { this->on_new_clicked(); });
     filemenu->append(*menuitem_new);
 
+    bet_label = Gtk::manage(new Gtk::Label());
+    vbox->add(*bet_label);
+
     grid = Gtk::manage(new Gtk::Grid);
     grid->set_hexpand(true);
     grid->set_vexpand(true); 
@@ -37,25 +40,22 @@ UI_Interface::UI_Interface(Controller* controller)
     Gtk::Button *hit_button = Gtk::manage(new Gtk::Button("HIT"));
     hit_button->signal_clicked().connect([this] { this->hit_button_pressed(); });
     //hit_button->set_device_enabled(Gdk::Device(*hit_button), false);
-    buttons.push_back(hit_button);
     Gtk::Button *stand_button = Gtk::manage(new Gtk::Button("STAND"));
     stand_button->signal_clicked().connect([this] { this->stand_button_pressed(); });
-    Gtk::Button *double_button = Gtk::manage(new Gtk::Button("DOUBLE"));
+    Gtk::Button *doubledown_button = Gtk::manage(new Gtk::Button("DOUBLE\n  DOWN"));
+    doubledown_button->signal_clicked().connect([this] {this->doubledown_button_pressed(); });
     Gtk::Button *split_button = Gtk::manage(new Gtk::Button("SPLIT"));
     split_button->signal_clicked().connect([this] { this->split_button_pressed(); });
     Gtk::Button *leave_button = Gtk::manage(new Gtk::Button("LEAVE"));
     leave_button->signal_clicked().connect([this] { this->leave_button_pressed(); });
+    buttons.push_back(hit_button);
     buttons.push_back(stand_button);
-    buttons.push_back(double_button);
+    buttons.push_back(doubledown_button);
     buttons.push_back(split_button);
 
     Gtk::Label *d_info = Gtk::manage(new Gtk::Label());
     d_info->set_label("Dealer :");
     grid->attach(*d_info,0,0,1,1);
-    //grid->attach(*hit_button,6,3,1,1);
-    //grid->attach(*stand_button,7,3,1,1);
-    //grid->attach(*split_button,7,4,1,1);
-    //grid->attach(*leave_button,8,3,1,1);
 
     grid->set_row_spacing(10);
     grid->set_column_spacing(10); 
@@ -65,22 +65,22 @@ UI_Interface::UI_Interface(Controller* controller)
     hbox->add(*hit_button);
     hbox->add(*stand_button);
     hbox->add(*split_button);
+    hbox->add(*doubledown_button);
     hbox->add(*leave_button);
     vbox->add(*hbox);
+    Glib::RefPtr<Gtk::Adjustment> adjustment = Gtk::Adjustment::create(0.0, 0.0, 101.0, 0.1, 1.0, 1.0);
 
-    Gtk::Scrollbar * scrollbar = Gtk::manage(new Gtk::Scrollbar());
-
+    //Scrollbar cannot make to be at right of window
+    //Gtk::Scrollbar * scrollbar = Gtk::manage(new Gtk::Scrollbar(adjustment, Gtk::ORIENTATION_VERTICAL));
     //vbox->add(*scrollbar);
+
     statusbar = Gtk::manage(new Gtk::Statusbar);
     status_label = Gtk::manage(new Gtk::Label());
     status_label->set_label("Waiting for players to join");
     statusbar->set_center_widget(*status_label);
     vbox->add(*statusbar);
+
     vbox->show_all();
-    //hit_button->hide();
-    //stand_button->hide();
-    //double_button->hide();
-    //split_button->hide();
 }
 
 
@@ -116,12 +116,17 @@ void UI_Interface::split_button_pressed()
     UI_Interface::controller->split();
 }
 
+void UI_Interface::doubledown_button_pressed()
+{
+    UI_Interface::controller->doubledown();
+}
+
 void UI_Interface::leave_button_pressed()
 {
     UI_Interface::controller->leave();
 }
 
-void UI_Interface::redraw(std::string data, int turn, bool split, int * results, int size)
+void UI_Interface::redraw(std::string data, int turn, bool split, int * results, int size, int bet)
 {
     std::cout << turn << " Turn " << std::endl;
     if(turn != UI_Interface::pid)
@@ -203,6 +208,7 @@ void UI_Interface::redraw(std::string data, int turn, bool split, int * results,
                 _container.push_back(storage(id, hid, Gtk::manage(new Gtk::Image(s))));
             }
         }
+        bet_label->set_label("Bet: " + std::to_string(bet));
         draw();
     }
     if(size > 0)
@@ -223,7 +229,7 @@ void UI_Interface::redraw(std::string data, int turn, bool split, int * results,
         }
         std::cout << wins << std::endl;
         Gtk::MessageDialog* dialog = new Gtk::MessageDialog(*this, "Results", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
-        dialog->set_message(wins, false);
+        dialog->set_secondary_text(wins, false);
         int r = dialog->run();
         delete dialog;
     }

@@ -154,7 +154,7 @@ class chat_client
         {
             std::string data(read_msg_.ca.g);
             std::cout << read_msg_.ca.size << " HEHHB" << std::endl;
-            win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.handWins, read_msg_.ca.size);
+            win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.handWins, read_msg_.ca.size, read_msg_.ca.bet);
         }
     private:
         asio::io_context& io_context_;
@@ -182,12 +182,9 @@ Controller::~Controller()
 
 void Controller::hit()
 {
-    //char line[chat_message::max_body_length + 1];
-    //std::strcpy(line, "garbage");
     chat_message msg;
 
     msg.body_length(0);
-    //std::memcpy(msg.body(), line, msg.body_length());
 
     // hitting 1 card
     msg.ca.hit = true;
@@ -233,6 +230,16 @@ void Controller::stand()
     c->write(msg);
 }
 
+void Controller::doubledown()
+{
+    chat_message msg;
+    msg.body_length(0);
+    msg.ca.id = c->get_id();
+    msg.ca.doubledown = true;
+    msg.encode_header();
+    c->write(msg);
+}
+
 void Controller::leave()
 {
     chat_message msg;
@@ -274,10 +281,6 @@ int main(int argc, char* argv[])
     std::thread t([&io_context](){ io_context.run(); });
     chat_message msg;
     msg.ca.client_credits = 100;
-
-    //char line[chat_message::max_body_length + 1];
-    //msg.body_length(std::strlen(line));
-    //std::memcpy(msg.body(), line, msg.body_length());
 
     // testing
     char ans;
