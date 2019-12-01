@@ -26,12 +26,20 @@ UI_Interface::UI_Interface(Controller* controller)
     menuitem_new->signal_activate().connect([this] { this->on_new_clicked(); });
     filemenu->append(*menuitem_new);
 
+    Gtk::HBox * h_labels = Gtk::manage(new Gtk::HBox());
+
     name_label = Gtk::manage(new Gtk::Label());
-    vbox->add(*name_label);
+    h_labels->add(*name_label);
+
+    //credit_label = Gtk::manage(new Gtk::Label());
+    //credit_label->set_label("Credits:  100");
+    //h_labels->add(*credit_label);
 
     bet_label = Gtk::manage(new Gtk::Label());
     bet_label->set_label("Bet: ");
-    vbox->add(*bet_label);
+    h_labels->add(*bet_label);
+
+    vbox->add(*h_labels);
 
     grid = Gtk::manage(new Gtk::Grid);
     grid->set_hexpand(true);
@@ -87,7 +95,7 @@ UI_Interface::~UI_Interface() {}
 
 void UI_Interface::set_name(std::string name)
 {
-    name_label->set_label(name);   
+    name_label->set_label("Name:  " + name);   
 }
 
 void UI_Interface::set_bet(std::string bet, int id)

@@ -39,6 +39,7 @@ class UI_Interface : public Gtk::Window
     Gtk::Label * status_label;
     Gtk::Label * bet_label;
     Gtk::Label * name_label;
+    //Gtk::Label * credit_label;
 
 };
 
