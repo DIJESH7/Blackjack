@@ -93,7 +93,8 @@ class chat_participant
 
         bool setNextHand()
         {
-            if(currentHand < playerHand.size()-1)
+            int temp = (playerHand.size()-1);
+            if(currentHand < temp)
             {
                 currentHand++;
                 return true;
@@ -126,8 +127,8 @@ class chat_participant
 	}
 
         int getHandTotal(int idx)
-        {
-            if(idx >= playerHand.size())
+        {   int size = playerHand.size();
+            if(idx >=size )
             {
                 return -1;
             }
@@ -540,6 +541,7 @@ class chat_room
                     return;
                 }
             }
+            return 0;
         }
 
         Dealer* dealer;
@@ -856,8 +858,8 @@ int main(int argc, char* argv[])
             servers.emplace_back(io_context, endpoint);
         }
         std::thread t([&io_context](){ io_context.run(); });
-        double seconds_passed;
-        double seconds_expire = 10;
+        //double seconds_passed;
+        //double seconds_expire = 20;
         while(true)
         {
             usleep(1000000);//sleep for 1 second to reduce memory consumption
