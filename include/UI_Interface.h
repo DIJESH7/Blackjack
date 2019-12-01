@@ -20,10 +20,12 @@ class UI_Interface : public Gtk::Window
         void on_new_clicked();
         void set_id(int id);
         void draw();
-        void redraw(std::string data, int turn, bool split, int * results, int size, int bet);
+        void redraw(std::string data, int turn, bool split, bool doubledown, int * results, int size);
+        void set_bet(std::string bet, int turn);
+        void add_bet(int bet);
 
     private:
-    std::vector<struct storage > _container;
+    std::vector<struct storage> _container;
     std::vector<int> ids;
     int pid;
     Gtk::Statusbar* statusbar;

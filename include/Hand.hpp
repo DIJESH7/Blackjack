@@ -108,6 +108,7 @@ class Hand
 
         bool canSplit()
         {
+            //return true; //this line for testing purposes
             if(inHand.size() != 2)
                 return false;
 
@@ -134,8 +135,14 @@ class Hand
             bet = bet_;
         }
 
+        bool can_double()
+        {
+            if(inHand.size() == 2)
+                return true;
+            return false;
+        }
+
         std::vector<Card>inHand;
-        //deque<Card>inHand;
         int handValue;
         int count;
         bool playing;

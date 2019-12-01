@@ -108,6 +108,7 @@ class chat_participant
             if(getCurrentHand().canSplit())
             {
                 Hand h;
+                h.set_bet(getCurrentHand().get_bet());
                 playerHand.insert(playerHand.begin()+currentHand+1, h);
                 Card temp;
                 temp = d.getCard();
@@ -132,6 +133,16 @@ class chat_participant
             }
             return playerHand[idx].getTotal();
 
+        }
+
+        std::string getAllBets()
+        {
+            std::string s = "";
+            for(auto hand : playerHand)
+            {
+                s += std::to_string(hand.get_bet()) + "   ";
+            }
+            return s;
         }
 
 
@@ -359,6 +370,7 @@ class chat_room
             chat_message handshake;
             handshake.ca.turn = pturn;
             handshake.ca.split_button = canBeSplit(pturn);
+            handshake.ca.double_button = checkDouble(pturn);
             turn = pturn;
             handshake.encode_header();
             for (auto participant : participants_)
@@ -428,6 +440,17 @@ class chat_room
 	    return false;
 	}
 
+        bool checkDouble(int id)
+        {
+            for(auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    return participant->getCurrentHand().can_double();
+                }
+            }
+        }
+
         void announceResults(int id)
         {
             int target = dealer->getTotal();
@@ -486,18 +509,6 @@ class chat_room
             }
         }
 
-        void double_bet(int id)
-        {
-            for(auto participant : participants_)
-            {
-                if(participant->id == id)
-                {
-                    int bet = participant->getCurrentHand().get_bet();
-                    participant->getCurrentHand().set_bet(2*bet);
-                }
-            }
-        }
-
         int get_bet(int id)
         {
             for(auto participant : participants_)
@@ -505,6 +516,28 @@ class chat_room
                 if(participant->id == id)
                 {
                     return participant->getCurrentHand().get_bet();
+                }
+            }
+        }
+
+        void deliverBets(int id)
+        {
+            for(auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    chat_message msg;
+                    std::string s = participant->getAllBets();
+                    char bet[s.size() +1 ];
+                    std::copy(s.begin(), s.end(), bet);
+                    bet[s.size()] = '\0';
+                    strcpy(msg.ca.updateBet, bet);
+                    msg.ca.id = id;
+                    std::cout << msg.ca.updateBet << " sbkhrb" << std::endl;
+                    msg.ca.update = true;
+                    msg.encode_header();
+                    deliver2(msg, id);
+                    return;
                 }
             }
         }
@@ -611,10 +644,12 @@ class chat_session
                           strcpy(read_msg_.ca.g, g);
                           if(busted)
                             read_msg_.ca.stand = true;
+                          
+                          room_.deliverBets(read_msg_.ca.id);
                       }
                       else if(read_msg_.ca.doubledown)
                       {
-                          room_.double_bet(read_msg_.ca.id);  
+                          room_.set_bet(read_msg_.ca.id, room_.get_bet(read_msg_.ca.id) + read_msg_.ca.bet);  
                           room_.giveCard(read_msg_.ca.id);
                           std::string gui = room_.stringOfCards();
                           char g[gui.size() +1 ];
@@ -622,6 +657,8 @@ class chat_session
                           g[gui.size()] = '\0';
                           strcpy(read_msg_.ca.g, g);
                           read_msg_.ca.stand = true;
+                          room_.deliverBets(read_msg_.ca.id);
+                          
                       }
                       else if(read_msg_.ca.leave == true)
                       {
@@ -697,8 +734,10 @@ class chat_session
                     {
 
                     read_msg_.ca.turn = turn;
-		    read_msg_.ca.split_button = room_.canBeSplit(read_msg_.ca.id);
+		    read_msg_.ca.split_button = room_.canBeSplit(turn);
+                    read_msg_.ca.double_button = room_.checkDouble(turn);
                     read_msg_.ca.bet = room_.get_bet(read_msg_.ca.id);
+                    std::cout << "dOUBLE :: " << read_msg_.ca.double_button << std::endl;
                     read_msg_.encode_header(); // save info in msg to be sent to client
                     room_.deliver(read_msg_); // deliver msg to all clients
                     if(reveal)

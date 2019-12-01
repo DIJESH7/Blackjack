@@ -27,6 +27,7 @@ UI_Interface::UI_Interface(Controller* controller)
     filemenu->append(*menuitem_new);
 
     bet_label = Gtk::manage(new Gtk::Label());
+    bet_label->set_label("Bet: ");
     vbox->add(*bet_label);
 
     grid = Gtk::manage(new Gtk::Grid);
@@ -83,8 +84,20 @@ UI_Interface::UI_Interface(Controller* controller)
     vbox->show_all();
 }
 
-
 UI_Interface::~UI_Interface() {}
+
+
+void UI_Interface::set_bet(std::string bet, int id)
+{
+    if(id == UI_Interface::pid)
+        bet_label->set_label("Bet: " + bet);
+
+}
+void UI_Interface::add_bet(int bet)
+{
+    bet_label->set_label(bet_label->get_text() + " " + std::to_string(bet));
+}
+
 
 void UI_Interface::on_button_clicked()
 {
@@ -118,7 +131,31 @@ void UI_Interface::split_button_pressed()
 
 void UI_Interface::doubledown_button_pressed()
 {
-    UI_Interface::controller->doubledown();
+    int bet;
+    //make a dialog and ask for bet
+    Gtk::Dialog * dialog = new Gtk::Dialog();
+    dialog->set_title("Bet Amount");
+    dialog->add_button("OK", -1);
+
+    Gtk::Label * label = new Gtk::Label("How much more would you like to bet?");
+    dialog->get_content_area()->pack_start(*label);
+    label->show();
+
+    Gtk::Entry * entry = new Gtk::Entry{};
+    entry->set_text("1");
+    entry->set_max_length(1);
+    entry->show();
+    dialog->get_vbox()->pack_start(*entry);
+    dialog->run();
+    std::string s = entry->get_text();
+    std::cout << s << std::endl;
+    dialog->close();
+    delete dialog;
+    delete entry;
+    delete label;
+
+    bet = std::stoi(s);
+    UI_Interface::controller->doubledown(bet);
 }
 
 void UI_Interface::leave_button_pressed()
@@ -126,7 +163,7 @@ void UI_Interface::leave_button_pressed()
     UI_Interface::controller->leave();
 }
 
-void UI_Interface::redraw(std::string data, int turn, bool split, int * results, int size, int bet)
+void UI_Interface::redraw(std::string data, int turn, bool split, bool doubledown, int * results, int size)
 {
     std::cout << turn << " Turn " << std::endl;
     if(turn != UI_Interface::pid)
@@ -151,6 +188,8 @@ void UI_Interface::redraw(std::string data, int turn, bool split, int * results,
         }
         if(!split)
             buttons[3]->set_sensitive(false);
+        if(!doubledown)
+            buttons[2]->set_sensitive(false);
     }
 
     //only destroy and refresh if there
@@ -208,7 +247,6 @@ void UI_Interface::redraw(std::string data, int turn, bool split, int * results,
                 _container.push_back(storage(id, hid, Gtk::manage(new Gtk::Image(s))));
             }
         }
-        bet_label->set_label("Bet: " + std::to_string(bet));
         draw();
     }
     if(size > 0)
@@ -230,8 +268,9 @@ void UI_Interface::redraw(std::string data, int turn, bool split, int * results,
         std::cout << wins << std::endl;
         Gtk::MessageDialog* dialog = new Gtk::MessageDialog(*this, "Results", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
         dialog->set_secondary_text(wins, false);
-        int r = dialog->run();
+        dialog->run();
         delete dialog;
+        status_label->set_text(wins);
     }
 }
 

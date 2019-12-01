@@ -38,6 +38,7 @@ class client_action
         bool doubledown = false;
         bool split = false;
 	bool split_button = false;
+        bool double_button = false;
         bool surrender = false;
         bool insurance = false;
         bool play = false;
@@ -51,6 +52,8 @@ class client_action
         int given_id = 0;
         int client_credits = 0;
         int bet = 0;
+        char updateBet[50];
+        bool update = false;
         int turn = 0;
         char C[5];
         char g[9999]; //have to make it large enough 

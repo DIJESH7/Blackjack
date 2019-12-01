@@ -154,7 +154,13 @@ class chat_client
         {
             std::string data(read_msg_.ca.g);
             std::cout << read_msg_.ca.size << " HEHHB" << std::endl;
-            win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.handWins, read_msg_.ca.size, read_msg_.ca.bet);
+            std::string bet(read_msg_.ca.updateBet);
+            if(read_msg_.ca.update)
+            {
+                std::cout << bet << "sfhbrsfkjb" << std::endl;
+                win->set_bet(bet, read_msg_.ca.id);
+            }
+            win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.double_button, read_msg_.ca.handWins, read_msg_.ca.size);
         }
     private:
         asio::io_context& io_context_;
@@ -230,12 +236,13 @@ void Controller::stand()
     c->write(msg);
 }
 
-void Controller::doubledown()
+void Controller::doubledown(int bet)
 {
     chat_message msg;
     msg.body_length(0);
     msg.ca.id = c->get_id();
     msg.ca.doubledown = true;
+    msg.ca.bet = bet;
     msg.encode_header();
     c->write(msg);
 }
@@ -305,6 +312,7 @@ int main(int argc, char* argv[])
     c->write(msg);
 
     std::thread t2([&](){ app->run(*win); });
+    win->add_bet(amount);
 
     //main keeps waiting for gui to exit...
     //only after gui closes, we close client
