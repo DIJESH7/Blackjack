@@ -43,7 +43,7 @@ UI_Interface::UI_Interface(Controller* controller)
     Gtk::Button *stand_button = Gtk::manage(new Gtk::Button("STAND"));
     stand_button->signal_clicked().connect([this] { this->stand_button_pressed(); });
     Gtk::Button *doubledown_button = Gtk::manage(new Gtk::Button("DOUBLE\n  DOWN"));
-    doubledown_button->signal_clicked().connect([this] {this->doubledown_button_pressed(); });
+    doubledown_button->signal_clicked().connect([this] {this->doubledown_button_pressed(""); });
     Gtk::Button *split_button = Gtk::manage(new Gtk::Button("SPLIT"));
     split_button->signal_clicked().connect([this] { this->split_button_pressed(); });
     Gtk::Button *leave_button = Gtk::manage(new Gtk::Button("LEAVE"));
@@ -132,17 +132,23 @@ void UI_Interface::split_button_pressed()
     UI_Interface::controller->split();
 }
 
-void UI_Interface::doubledown_button_pressed()
+void UI_Interface::doubledown_button_pressed(std::string msg)
 {
     int bet;
     //make a dialog and ask for bet
     Gtk::Dialog * dialog = new Gtk::Dialog();
     dialog->set_title("Bet Amount");
-    dialog->add_button("OK", -1);
+    dialog->add_button("Cancel", 0);
+    dialog->add_button("OK", 1);
 
     Gtk::Label * label = new Gtk::Label("How much more would you like to bet?");
     dialog->get_content_area()->pack_start(*label);
     label->show();
+
+    Gtk::Label * message = new Gtk::Label(msg);
+    message->show();
+    if(msg.length() > 0)
+        dialog->get_content_area()->add(*message);
 
 Glib::RefPtr<Gtk::Adjustment> adjustment(Gtk::Adjustment::create(1.0, 1.0, 5.0, 1.0, 5.0, 0.0));
     Gtk::SpinButton * spinButton = new Gtk::SpinButton(adjustment);
@@ -154,14 +160,19 @@ Glib::RefPtr<Gtk::Adjustment> adjustment(Gtk::Adjustment::create(1.0, 1.0, 5.0, 
     spinButton->show();
 
     dialog->get_content_area()->add(*spinButton);
-    dialog->run();
+    int r = dialog->run();
     dialog->close();
     bet = spinButton->get_value();
     delete dialog;
     delete spinButton;
     delete label;
+    delete message;
 
-    UI_Interface::controller->doubledown(bet);
+    if(r == 1)
+    {
+        UI_Interface::controller->doubledown(bet);
+    }
+    return;
 }
 
 void UI_Interface::leave_button_pressed()

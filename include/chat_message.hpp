@@ -54,6 +54,7 @@ class client_action
         int bet = 0;
         char updateBet[50];
         bool update = false;
+        int error = 0;
         int turn = 0;
         char C[5];
         char g[9999]; //have to make it large enough 

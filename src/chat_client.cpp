@@ -160,6 +160,10 @@ class chat_client
                 std::cout << bet << "sfhbrsfkjb" << std::endl;
                 win->set_bet(bet, read_msg_.ca.id);
             }
+            if(read_msg_.ca.error == 1)
+            {
+                win->doubledown_button_pressed("You cannot wager more than your original bet");
+            }
             win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.double_button, read_msg_.ca.handWins, read_msg_.ca.size);
         }
     private:

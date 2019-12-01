@@ -548,6 +548,22 @@ class chat_room
             return;
         }
 
+        void deliverErr(int id, int code)
+        {
+            for(auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    chat_message msg;
+                    msg.ca.id = id;
+                    msg.ca.error = 1;
+                    msg.encode_header();
+                    deliver2(msg, id);
+                    return;
+                }
+            }
+        }
+
         Dealer* dealer;
 
     private:
@@ -655,15 +671,20 @@ class chat_session
                       }
                       else if(read_msg_.ca.doubledown)
                       {
-                          room_.set_bet(read_msg_.ca.id, room_.get_bet(read_msg_.ca.id) + read_msg_.ca.bet);  
-                          room_.giveCard(read_msg_.ca.id);
-                          std::string gui = room_.stringOfCards();
-                          char g[gui.size() +1 ];
-                          std::copy(gui.begin(), gui.end(), g);
-                          g[gui.size()] = '\0';
-                          strcpy(read_msg_.ca.g, g);
-                          read_msg_.ca.stand = true;
-                          room_.deliverBets(read_msg_.ca.id);
+                          if(read_msg_.ca.bet > room_.get_bet(read_msg_.ca.id))
+                            room_.deliverErr(read_msg_.ca.id, 1);
+                          else
+                          {
+                            room_.set_bet(read_msg_.ca.id, room_.get_bet(read_msg_.ca.id) + read_msg_.ca.bet);  
+                            room_.giveCard(read_msg_.ca.id);
+                            std::string gui = room_.stringOfCards();
+                            char g[gui.size() +1 ];
+                            std::copy(gui.begin(), gui.end(), g);
+                            g[gui.size()] = '\0';
+                            strcpy(read_msg_.ca.g, g);
+                            read_msg_.ca.stand = true;
+                            room_.deliverBets(read_msg_.ca.id);
+                          }
                           
                       }
                       else if(read_msg_.ca.leave == true)
@@ -739,27 +760,27 @@ class chat_session
                     if (!ec)
                     {
 
-                    read_msg_.ca.turn = turn;
-		    read_msg_.ca.split_button = room_.canBeSplit(turn);
-                    read_msg_.ca.double_button = room_.checkDouble(turn);
-                    read_msg_.ca.bet = room_.get_bet(read_msg_.ca.id);
-                    std::cout << "dOUBLE :: " << read_msg_.ca.double_button << std::endl;
-                    read_msg_.encode_header(); // save info in msg to be sent to client
-                    room_.deliver(read_msg_); // deliver msg to all clients
-                    if(reveal)
-                    {
-                        usleep(500000); //sleep for half second
-                                         //give user chance to see the cards
-                        room_.announceResults(-1);
-                    }
+                      read_msg_.ca.turn = turn;
+		      read_msg_.ca.split_button = room_.canBeSplit(turn);
+                      read_msg_.ca.double_button = room_.checkDouble(turn);
+                      read_msg_.ca.bet = room_.get_bet(read_msg_.ca.id);
+                      std::cout << "dOUBLE :: " << read_msg_.ca.double_button << std::endl;
+                      read_msg_.encode_header(); // save info in msg to be sent to client
+                      room_.deliver(read_msg_); // deliver msg to all clients
+                      if(reveal)
+                      {
+                          usleep(500000); //sleep for half second
+                                           //give user chance to see the cards
+                          room_.announceResults(-1);
+                      }
 
-                    //room_.deliver(read_msg_, id); // can send to specific client
+                      //room_.deliver(read_msg_, id); // can send to specific client
 
-                    do_read_header();
+                      do_read_header();
                     }
                     else
                     {
-                    room_.leave(shared_from_this());
+                      room_.leave(shared_from_this());
                     }
                     });
         }

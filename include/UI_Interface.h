@@ -13,7 +13,7 @@ class UI_Interface : public Gtk::Window
         ~UI_Interface();
         void hit_button_pressed();
         void stand_button_pressed();
-        void doubledown_button_pressed();
+        void doubledown_button_pressed(std::string msg);
         void split_button_pressed();
         void leave_button_pressed();
         void on_button_clicked();
