@@ -26,12 +26,24 @@ UI_Interface::UI_Interface(Controller* controller)
     menuitem_new->signal_activate().connect([this] { this->on_new_clicked(); });
     filemenu->append(*menuitem_new);
 
+    F_grid= Gtk::manage(new Gtk::Grid);    
+
+    credit_label= Gtk::manage(new Gtk::Label());
+
     name_label = Gtk::manage(new Gtk::Label());
-    vbox->add(*name_label);
+    //vbox->add(*name_label);
 
     bet_label = Gtk::manage(new Gtk::Label());
     bet_label->set_label("Bet: ");
-    vbox->add(*bet_label);
+    //vbox->add(*bet_label);
+    
+
+
+    F_grid->attach(*name_label,0,0,2,1);
+    F_grid->attach(*bet_label,2,0,2,1);
+    F_grid->attach(*credit_label,4,0,1,1);
+
+    vbox->add(*F_grid);
 
     grid = Gtk::manage(new Gtk::Grid);
     grid->set_hexpand(true);
@@ -87,20 +99,24 @@ UI_Interface::~UI_Interface() {}
 
 void UI_Interface::set_name(std::string name)
 {
-    name_label->set_label(name);   
+    name_label->set_label(" Name: " + name + "\t");   
 }
 
 void UI_Interface::set_bet(std::string bet, int id)
 {
     if(id == UI_Interface::pid)
-        bet_label->set_label("Bet: " + bet);
+        bet_label->set_label("\tBet: " + bet + "\t");
 
 }
 void UI_Interface::add_bet(int bet)
-{
+{	
     bet_label->set_label(bet_label->get_text() + " " + std::to_string(bet));
 }
 
+void UI_Interface::show_credit(int credit){
+
+	credit_label->set_label("\t\tYour Credit: " + to_string(credit) + "\t");
+}
 
 void UI_Interface::on_button_clicked()
 {
@@ -180,7 +196,7 @@ void UI_Interface::leave_button_pressed()
     UI_Interface::controller->leave();
 }
 
-void UI_Interface::redraw(std::string data, int turn, bool split, bool doubledown, int * results, int size)
+void UI_Interface::redraw(std::string data, int turn, bool split, bool doubledown, int * results, int size, int credits)
 {
     std::cout << turn << " Turn " << std::endl;
     if(turn != UI_Interface::pid)
@@ -288,6 +304,7 @@ void UI_Interface::redraw(std::string data, int turn, bool split, bool doubledow
         dialog->run();
         delete dialog;
         status_label->set_text(wins);
+        credit_label->set_label("\t\tYour Credit: " + to_string(credits) + "\t");
     }
 }
 
