@@ -99,11 +99,7 @@ UI_Interface::~UI_Interface() {}
 
 void UI_Interface::set_name(std::string name)
 {
-<<<<<<< HEAD
-    name_label->set_label("Name:  " + name);   
-=======
     name_label->set_label(" Name: " + name + "\t");   
->>>>>>> 4bb21ddec12687e689de1d435f23aa5635e9e4c5
 }
 
 void UI_Interface::set_bet(std::string bet, int id)
