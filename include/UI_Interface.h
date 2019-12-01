@@ -20,10 +20,11 @@ class UI_Interface : public Gtk::Window
         void on_new_clicked();
         void set_id(int id);
         void draw();
-        void redraw(std::string data, int turn, bool split, bool doubledown, int * results, int size);
+        void redraw(std::string data, int turn, bool split, bool doubledown, int * results, int size, int credits);
         void set_bet(std::string bet, int turn);
         void add_bet(int bet);
         void set_name(std::string name);
+        void show_credit(int);
 
     private:
     std::vector<struct storage> _container;
@@ -39,6 +40,8 @@ class UI_Interface : public Gtk::Window
     Gtk::Label * status_label;
     Gtk::Label * bet_label;
     Gtk::Label * name_label;
+    Gtk::Label * credit_label;
+    Gtk::Grid *F_grid;
 
 };
 

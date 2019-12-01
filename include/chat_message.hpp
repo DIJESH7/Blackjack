@@ -50,7 +50,7 @@ class client_action
         int handWins[24];
         int size = 0;
         int given_id = 0;
-        int client_credits = 0;
+        int client_credits = 100;
         int bet = 0;
         char updateBet[50];
         bool update = false;
