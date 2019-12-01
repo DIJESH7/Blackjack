@@ -450,6 +450,7 @@ class chat_room
                     return participant->getCurrentHand().can_double();
                 }
             }
+            return false;
         }
 
         void announceResults(int id)
@@ -519,6 +520,7 @@ class chat_room
                     return participant->getCurrentHand().get_bet();
                 }
             }
+            return -1;
         }
 
         void deliverBets(int id)
@@ -541,7 +543,7 @@ class chat_room
                     return;
                 }
             }
-            return 0;
+            return;
         }
 
         Dealer* dealer;
