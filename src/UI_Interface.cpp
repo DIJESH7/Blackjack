@@ -144,20 +144,23 @@ void UI_Interface::doubledown_button_pressed()
     dialog->get_content_area()->pack_start(*label);
     label->show();
 
-    Gtk::Entry * entry = new Gtk::Entry{};
-    entry->set_text("1");
-    entry->set_max_length(1);
-    entry->show();
-    dialog->get_vbox()->pack_start(*entry);
+Glib::RefPtr<Gtk::Adjustment> adjustment(Gtk::Adjustment::create(1.0, 1.0, 5.0, 1.0, 5.0, 0.0));
+    Gtk::SpinButton * spinButton = new Gtk::SpinButton(adjustment);
+    spinButton->set_digits(0);
+    spinButton->set_numeric(true);
+    spinButton->set_wrap();
+    spinButton->set_value(2);
+    spinButton->set_snap_to_ticks();
+    spinButton->show();
+
+    dialog->get_content_area()->add(*spinButton);
     dialog->run();
-    std::string s = entry->get_text();
-    std::cout << s << std::endl;
     dialog->close();
+    bet = spinButton->get_value();
     delete dialog;
-    delete entry;
+    delete spinButton;
     delete label;
 
-    bet = std::stoi(s);
     UI_Interface::controller->doubledown(bet);
 }
 
