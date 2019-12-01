@@ -159,12 +159,14 @@ class chat_client
             {
                 std::cout << bet << "sfhbrsfkjb" << std::endl;
                 win->set_bet(bet, read_msg_.ca.id);
+                
             }
             if(read_msg_.ca.error == 1)
             {
                 win->doubledown_button_pressed("You cannot wager more than your original bet");
             }
-            win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.double_button, read_msg_.ca.handWins, read_msg_.ca.size);
+
+            win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.double_button, read_msg_.ca.handWins, read_msg_.ca.size, read_msg_.ca.client_credits);
         }
     private:
         asio::io_context& io_context_;
@@ -291,7 +293,6 @@ int main(int argc, char* argv[])
 
     std::thread t([&io_context](){ io_context.run(); });
     chat_message msg;
-    msg.ca.client_credits = 100;
 
     gdk_threads_enter();
     Gtk::Dialog * dialog = new Gtk::Dialog("Welcome");
@@ -335,6 +336,7 @@ Glib::RefPtr<Gtk::Adjustment> m_adjustment_day(Gtk::Adjustment::create(1.0, 1.0,
     delete dialog;
 
     win->set_name(name);
+    win->show_credit(msg.ca.client_credits);
 
     Card temp;
 

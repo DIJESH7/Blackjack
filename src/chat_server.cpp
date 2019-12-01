@@ -126,25 +126,27 @@ class chat_participant
 	    return getCurrentHand().canSplit();	
 	}
 
-        int getHandTotal(int idx)
-        {   int size = playerHand.size();
-            if(idx >=size )
-            {
-                return -1;
-            }
-            return playerHand[idx].getTotal();
-
-        }
-
-        std::string getAllBets()
+    int getHandTotal(int idx)
+    {   int size = playerHand.size();
+        if(idx >=size )
         {
-            std::string s = "";
-            for(auto hand : playerHand)
-            {
-                s += std::to_string(hand.get_bet()) + "   ";
-            }
-            return s;
+            return -1;
         }
+        return playerHand[idx].getTotal();
+
+    }
+
+    std::string getAllBets()
+    {
+        std::string s = "";
+        for(auto hand : playerHand)
+        {
+            s += std::to_string(hand.get_bet()) + "   ";
+        }
+        return s;
+    }
+
+
 
 
         int id;
@@ -473,20 +475,29 @@ class chat_room
                     {
 
                         //player Hand busts
-                        if(total > 21) 
+                        if(total > 21){
                             v.push_back(-1);
+                            handshake.ca.client_credits -= participant->getCurrentHand().get_bet();
+                        }
                         //dealer busts
-                        else if(target > 21) 
+                        else if(target > 21){ 
                             v.push_back(1);
+                            handshake.ca.client_credits += participant->getCurrentHand().get_bet();
+                        }
                         //dealer is closer to 21 than player
-                        else if(target > total) 
+                        else if(target > total){
                             v.push_back(-1);
+                            handshake.ca.client_credits -= participant->getCurrentHand().get_bet();
+                        }
                         //tied
-                        else if(target == total)
+                        else if(target == total){
                             v.push_back(2);
+                        }
                         //player is closer to 21 than dealer
-                        else 
+                        else{
                             v.push_back(1);
+                            handshake.ca.client_credits += participant->getCurrentHand().get_bet();
+                        }
 
                         total = participant->getHandTotal(i++);
                     }
@@ -638,7 +649,9 @@ class chat_session
                           std::copy(gui.begin(), gui.end(), g);
                           g[gui.size()] = '\0';
                           strcpy(read_msg_.ca.g, g);
+
                           room_.set_bet(read_msg_.ca.id, read_msg_.ca.bet);
+                          
                       }
 
                       if(read_msg_.ca.hit == true)
