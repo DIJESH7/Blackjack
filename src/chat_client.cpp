@@ -289,25 +289,55 @@ int main(int argc, char* argv[])
     chat_message msg;
     msg.ca.client_credits = 100;
 
-    // testing
-    char ans;
-    do
-    {
-        std::cout << "Play? y/n" << std::endl;
-        std::cin >> ans;
-    }
-    while(ans != 'y');
+    gdk_threads_enter();
+    Gtk::Dialog * dialog = new Gtk::Dialog("Welcome");
+    dialog->add_button("Ready", 1);
 
-    std::cout << "Bet amount? [max 3, min 1]" << std::endl;
-    int amount;
-    //TODO check for min and max input
-    std::cin >> amount;
-    msg.ca.bet = amount;
+    Gtk::Label * label = new Gtk::Label("Your Name: ");
+    dialog->get_content_area()->pack_start(*label);
+    label->show();
+
+    Gtk::Entry * entry = new Gtk::Entry{};
+    entry->set_text("Name");
+    entry->set_max_length(50);
+    entry->show();
+    dialog->get_vbox()->pack_start(*entry);
+
+    Gtk::Label * label2 = new Gtk::Label("Bet Amount: ");
+    dialog->get_content_area()->add(*label2);
+    label2->show();
+
+Glib::RefPtr<Gtk::Adjustment> m_adjustment_day(Gtk::Adjustment::create(1.0, 1.0, 5.0, 1.0, 5.0, 0.0));
+    Gtk::SpinButton * bet = new Gtk::SpinButton(m_adjustment_day);
+    bet->set_digits(0);
+    bet->set_numeric(true);
+    bet->set_wrap();
+    bet->set_value(2);
+    bet->set_snap_to_ticks();
+    bet->show();
+
+    dialog->get_content_area()->add(*bet);
+    dialog->run();
+    dialog->close();
+
+    std::string name = entry->get_text();
+    int amount = bet->get_value();
+    std::cout << name << " " << amount << std::endl;
+
+    gdk_threads_leave();
+
+    delete entry;
+    delete label;
+    delete dialog;
+
+    win->set_name(name);
+
     Card temp;
 
     //start dealing
     msg.ca.play = true;
     msg.ca.id = c->get_id();
+    msg.ca.bet = amount;
     msg.encode_header();
     c->write(msg);
 

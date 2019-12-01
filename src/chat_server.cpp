@@ -502,6 +502,7 @@ class chat_room
 
         void set_bet(int id, int bet)
         {
+            std::cout << "BET: " << bet << std::endl;
             for(auto participant : participants_)
             {
                 if(participant->id == id)
@@ -517,6 +518,7 @@ class chat_room
             {
                 if(participant->id == id)
                 {
+                    std::cout << "BET: jjj " << participant->getCurrentHand().get_bet() << std::endl;
                     return participant->getCurrentHand().get_bet();
                 }
             }

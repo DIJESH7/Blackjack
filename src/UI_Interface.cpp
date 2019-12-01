@@ -26,6 +26,9 @@ UI_Interface::UI_Interface(Controller* controller)
     menuitem_new->signal_activate().connect([this] { this->on_new_clicked(); });
     filemenu->append(*menuitem_new);
 
+    name_label = Gtk::manage(new Gtk::Label());
+    vbox->add(*name_label);
+
     bet_label = Gtk::manage(new Gtk::Label());
     bet_label->set_label("Bet: ");
     vbox->add(*bet_label);
@@ -33,10 +36,6 @@ UI_Interface::UI_Interface(Controller* controller)
     grid = Gtk::manage(new Gtk::Grid);
     grid->set_hexpand(true);
     grid->set_vexpand(true); 
-
-    // reverse for j because grid is added top down
-
-    std::string tile_image = "images/cards/2 of S.jpg";
 
     Gtk::Button *hit_button = Gtk::manage(new Gtk::Button("HIT"));
     hit_button->signal_clicked().connect([this] { this->hit_button_pressed(); });
@@ -86,6 +85,10 @@ UI_Interface::UI_Interface(Controller* controller)
 
 UI_Interface::~UI_Interface() {}
 
+void UI_Interface::set_name(std::string name)
+{
+    name_label->set_label(name);   
+}
 
 void UI_Interface::set_bet(std::string bet, int id)
 {
