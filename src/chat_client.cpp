@@ -86,28 +86,28 @@ class chat_client
                     asio::buffer(read_msg_.data(), chat_message::header_length),
                     [this](std::error_code ec, std::size_t /*length*/)
                     {
-                      if (!ec && read_msg_.decode_header())
-                      {
-                        //system("clear");
-			gdk_threads_enter();
-                        if(!gotId) //runs only first time
-                        {
-                          id = read_msg_.ca.id;
-                          gotId = true;
-                          win->set_id(id);
-                          std::cout << "New Player connected with Player ID "<< id << std::endl;
-                          std::cout << "Your Player id: "<< id << std::endl;
-                        }
-                        std::cout << std::endl;
-                        //std::cout << read_msg_.ca.g << std::endl;
-                        do_read_body();
-                        storeData();
-			gdk_threads_leave();
-                      }
-                      else
-                      {
+                    if (!ec && read_msg_.decode_header())
+                    {
+                    //system("clear");
+                    gdk_threads_enter();
+                    if(!gotId) //runs only first time
+                    {
+                    id = read_msg_.ca.id;
+                    gotId = true;
+                    win->set_id(id);
+                    std::cout << "New Player connected with Player ID "<< id << std::endl;
+                    std::cout << "Your Player id: "<< id << std::endl;
+                    }
+                    std::cout << std::endl;
+                    //std::cout << read_msg_.ca.g << std::endl;
+                    do_read_body();
+                    storeData();
+                    gdk_threads_leave();
+                    }
+                    else
+                    {
                         socket_.close();
-                      }
+                    }
                     });
         }
 
@@ -153,20 +153,21 @@ class chat_client
         void storeData()
         {
             std::string data(read_msg_.ca.g);
-            std::cout << read_msg_.ca.size << " HEHHB" << std::endl;
             std::string bet(read_msg_.ca.updateBet);
+            std::cout << read_msg_.ca.g << std::endl;
             if(read_msg_.ca.update)
             {
-                std::cout << bet << "sfhbrsfkjb" << std::endl;
                 win->set_bet(bet, read_msg_.ca.id);
-                
+
             }
-            if(read_msg_.ca.error == 1)
+            else if(read_msg_.ca.error == 1)
             {
                 win->doubledown_button_pressed("You cannot wager more than your original bet");
             }
-
-            win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.double_button, read_msg_.ca.handWins, read_msg_.ca.size, read_msg_.ca.client_credits);
+            else
+            {
+                win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.double_button, read_msg_.ca.handWins, read_msg_.ca.size, read_msg_.ca.client_credits);
+            }
         }
     private:
         asio::io_context& io_context_;
@@ -189,7 +190,7 @@ Controller::Controller()
 
 Controller::~Controller()
 {
-    
+
 }
 
 void Controller::hit()
@@ -270,6 +271,66 @@ void Controller::leave()
     exit(0);
 }
 
+void Controller::new_game()
+{
+    
+    chat_message msg;
+
+    gdk_threads_enter();
+    Gtk::Dialog * dialog = new Gtk::Dialog("Welcome");
+    dialog->add_button("Ready", 1);
+
+    Gtk::Label * label = new Gtk::Label("Your Name: ");
+    dialog->get_content_area()->pack_start(*label);
+    label->show();
+
+    Gtk::Entry * entry = new Gtk::Entry{};
+    entry->set_text("Name");
+    entry->set_max_length(50);
+    entry->show();
+    dialog->get_vbox()->pack_start(*entry);
+
+    Gtk::Label * label2 = new Gtk::Label("Bet Amount: ");
+    dialog->get_content_area()->add(*label2);
+    label2->show();
+
+    Glib::RefPtr<Gtk::Adjustment> m_adjustment_day(Gtk::Adjustment::create(1.0, 1.0, 5.0, 1.0, 5.0, 0.0));
+    Gtk::SpinButton * bet = new Gtk::SpinButton(m_adjustment_day);
+    bet->set_digits(0);
+    bet->set_numeric(true);
+    bet->set_wrap();
+    bet->set_value(2);
+    bet->set_snap_to_ticks();
+    bet->show();
+
+    dialog->get_content_area()->add(*bet);
+    dialog->run();
+    dialog->close();
+
+    std::string name = entry->get_text();
+    int amount = bet->get_value();
+    std::cout << name << " " << amount << std::endl;
+
+    gdk_threads_leave();
+
+    delete entry;
+    delete label;
+    delete dialog;
+
+    win->set_name(name);
+    win->show_credit(msg.ca.client_credits);
+
+    Card temp;
+
+    //start dealing
+    msg.ca.play = true;
+    msg.ca.id = c->get_id();
+    msg.ca.bet = amount;
+    msg.encode_header();
+    c->write(msg);
+    win->add_bet(amount);
+}
+
 int main(int argc, char* argv[])
 {
 
@@ -312,7 +373,7 @@ int main(int argc, char* argv[])
     dialog->get_content_area()->add(*label2);
     label2->show();
 
-Glib::RefPtr<Gtk::Adjustment> m_adjustment_day(Gtk::Adjustment::create(1.0, 1.0, 5.0, 1.0, 5.0, 0.0));
+    Glib::RefPtr<Gtk::Adjustment> m_adjustment_day(Gtk::Adjustment::create(1.0, 1.0, 5.0, 1.0, 5.0, 0.0));
     Gtk::SpinButton * bet = new Gtk::SpinButton(m_adjustment_day);
     bet->set_digits(0);
     bet->set_numeric(true);

@@ -10,6 +10,7 @@ class Controller
         void doubledown(int bet);
         void split();
         void leave();
+        void new_game();
         ~Controller();
 
     private:

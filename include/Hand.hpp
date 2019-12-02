@@ -108,7 +108,7 @@ class Hand
 
         bool canSplit()
         {
-            //return true; //this line for testing purposes
+            return true; //this line for testing purposes
             if(inHand.size() != 2)
                 return false;
 

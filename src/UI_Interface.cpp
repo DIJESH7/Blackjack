@@ -26,24 +26,19 @@ UI_Interface::UI_Interface(Controller* controller)
     menuitem_new->signal_activate().connect([this] { this->on_new_clicked(); });
     filemenu->append(*menuitem_new);
 
-    F_grid= Gtk::manage(new Gtk::Grid);    
+    Gtk::HBox * h_labels = Gtk::manage(new Gtk::HBox);    
 
     credit_label= Gtk::manage(new Gtk::Label());
 
     name_label = Gtk::manage(new Gtk::Label());
-    //vbox->add(*name_label);
 
     bet_label = Gtk::manage(new Gtk::Label());
     bet_label->set_label("Bet: ");
-    //vbox->add(*bet_label);
-    
 
-
-    F_grid->attach(*name_label,0,0,2,1);
-    F_grid->attach(*bet_label,2,0,2,1);
-    F_grid->attach(*credit_label,4,0,1,1);
-
-    vbox->add(*F_grid);
+    h_labels->add(*name_label);
+    h_labels->add(*bet_label);
+    h_labels->add(*credit_label);
+    vbox->add(*h_labels);
 
     grid = Gtk::manage(new Gtk::Grid);
     grid->set_hexpand(true);
@@ -51,15 +46,19 @@ UI_Interface::UI_Interface(Controller* controller)
 
     Gtk::Button *hit_button = Gtk::manage(new Gtk::Button("HIT"));
     hit_button->signal_clicked().connect([this] { this->hit_button_pressed(); });
-    //hit_button->set_device_enabled(Gdk::Device(*hit_button), false);
+
     Gtk::Button *stand_button = Gtk::manage(new Gtk::Button("STAND"));
     stand_button->signal_clicked().connect([this] { this->stand_button_pressed(); });
+
     Gtk::Button *doubledown_button = Gtk::manage(new Gtk::Button("DOUBLE\n  DOWN"));
     doubledown_button->signal_clicked().connect([this] {this->doubledown_button_pressed(""); });
+
     Gtk::Button *split_button = Gtk::manage(new Gtk::Button("SPLIT"));
     split_button->signal_clicked().connect([this] { this->split_button_pressed(); });
+
     Gtk::Button *leave_button = Gtk::manage(new Gtk::Button("LEAVE"));
     leave_button->signal_clicked().connect([this] { this->leave_button_pressed(); });
+
     buttons.push_back(hit_button);
     buttons.push_back(stand_button);
     buttons.push_back(doubledown_button);
@@ -113,9 +112,9 @@ void UI_Interface::add_bet(int bet)
     bet_label->set_label(bet_label->get_text() + " " + std::to_string(bet));
 }
 
-void UI_Interface::show_credit(int credit){
-
-	credit_label->set_label("\t\tYour Credit: " + to_string(credit) + "\t");
+void UI_Interface::show_credit(int credit)
+{
+    credit_label->set_label("\t\tYour Credit: " + to_string(credit) + "\t");
 }
 
 void UI_Interface::on_button_clicked()
@@ -245,6 +244,7 @@ void UI_Interface::redraw(std::string data, int turn, bool split, bool doubledow
         labels.clear();
         ids.clear();
         std::stringstream ss(data);//convert string to sstream
+        std::cout << data << std::endl;
         int id = 0;
         int hid = 0;
 
@@ -276,7 +276,6 @@ void UI_Interface::redraw(std::string data, int turn, bool split, bool doubledow
                 token = token.substr(0,5); //substr to remove trailing spaces
                 s += token;
                 s += ".jpg";
-                //images.insert(pair<int, Gtk::Image*>(id, Gtk::manage(new Gtk::Image(s))));
                 _container.push_back(storage(id, hid, Gtk::manage(new Gtk::Image(s))));
             }
         }

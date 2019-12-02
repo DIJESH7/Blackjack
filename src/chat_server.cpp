@@ -121,36 +121,45 @@ class chat_participant
             }
         }
 
-	bool checkSplit()
-	{
-	    return getCurrentHand().canSplit();	
-	}
-
-    int getHandTotal(int idx)
-    {   int size = playerHand.size();
-        if(idx >=size )
+        bool checkSplit()
         {
-            return -1;
+            return getCurrentHand().canSplit();	
         }
-        return playerHand[idx].getTotal();
 
-    }
-
-    std::string getAllBets()
-    {
-        std::string s = "";
-        for(auto hand : playerHand)
+        int getHandTotal(int idx)
         {
-            s += std::to_string(hand.get_bet()) + "   ";
+            int size = playerHand.size();
+            if(idx >= size )
+            {
+                return -1;
+            }
+            return playerHand[idx].getTotal();
+
         }
-        return s;
-    }
 
+        int getHandBets(int idx)
+        {
+            int size = playerHand.size();
+            if(idx >= size)
+            {
+                return -1;
+            }
+            return playerHand[idx].get_bet();
+        }
 
-
+        std::string getAllBets()
+        {
+            std::string s = "";
+            for(auto hand : playerHand)
+            {
+                s += std::to_string(hand.get_bet()) + "   ";
+            }
+            return s;
+        }
 
         int id;
         bool play = false;
+        int credits = 100;
     private:
         int currentHand = 0;
         std::vector<Hand> playerHand;
@@ -225,8 +234,10 @@ class chat_room
 
             if(inplay || playercount > 6)
             {
+                std::cout << participant->id << std::endl;
                 //tell them to wait
                 strcpy(handshake.ca.g, "Please wait for the game to finish\n");
+                handshake.ca.id = participant->id;
                 handshake.ca.turn = 0;
                 handshake.encode_header();
                 participant->deliver(handshake);
@@ -244,9 +255,6 @@ class chat_room
                     participant->deliver(msg);
                 }
             }
-
-
-
         }
 
         void leave(chat_participant_ptr participant)
@@ -469,40 +477,55 @@ class chat_room
                     // 0  = game in progress
                     //-1  = lost
                     // 1  = win
-                    int i = 1;
+                    int i = 0;
 
                     while(total != -1)
                     {
 
                         //player Hand busts
-                        if(total > 21){
+                        if(total > 21)
+                        {
                             v.push_back(-1);
-                            handshake.ca.client_credits -= participant->getCurrentHand().get_bet();
+                            participant->credits -= participant->getHandBets(i);
+                            handshake.ca.client_credits = participant->credits;
                         }
                         //dealer busts
-                        else if(target > 21){ 
+                        else if(target > 21)
+                        { 
                             v.push_back(1);
-                            handshake.ca.client_credits += participant->getCurrentHand().get_bet();
+                            participant->credits += participant->getHandBets(i);
+                            handshake.ca.client_credits = participant->credits;
                         }
                         //dealer is closer to 21 than player
-                        else if(target > total){
+                        else if(target > total)
+                        {
                             v.push_back(-1);
-                            handshake.ca.client_credits -= participant->getCurrentHand().get_bet();
+                            participant->credits -= participant->getHandBets(i);
+                            handshake.ca.client_credits = participant->credits;
                         }
                         //tied
-                        else if(target == total){
+                        else if(target == total)
+                        {
                             v.push_back(2);
                         }
                         //player is closer to 21 than dealer
-                        else{
+                        else
+                        {
                             v.push_back(1);
-                            handshake.ca.client_credits += participant->getCurrentHand().get_bet();
+                            participant->credits += participant->getHandBets(i);
+                            handshake.ca.client_credits = participant->credits;
                         }
 
-                        total = participant->getHandTotal(i++);
+                        total = participant->getHandTotal(++i);
                     }
                     std::copy(v.begin(), v.end(), handshake.ca.handWins);
                     handshake.ca.size = v.size();
+                    std::string gui = stringOfCards();
+                    char g[gui.size() +1 ];
+                    std::copy(gui.begin(), gui.end(), g);
+                    g[gui.size()] = '\0';
+                    strcpy(handshake.ca.g, g);
+                    std::cout << "ID: " << handshake.ca.turn << handshake.ca.client_credits << std::endl;
                     handshake.encode_header();
                     participant->deliver(handshake);
                 }
@@ -529,7 +552,6 @@ class chat_room
             {
                 if(participant->id == id)
                 {
-                    std::cout << "BET: jjj " << participant->getCurrentHand().get_bet() << std::endl;
                     return participant->getCurrentHand().get_bet();
                 }
             }
@@ -549,7 +571,6 @@ class chat_room
                     bet[s.size()] = '\0';
                     strcpy(msg.ca.updateBet, bet);
                     msg.ca.id = id;
-                    std::cout << msg.ca.updateBet << " sbkhrb" << std::endl;
                     msg.ca.update = true;
                     msg.encode_header();
                     deliver2(msg, id);
@@ -633,7 +654,7 @@ class chat_session
                     if (!ec && read_msg_.decode_header()) 
                     {
 
-                      if(read_msg_.ca.play == true)
+                      if(read_msg_.ca.play && room_.idInVector(read_msg_.ca.id))
                       {
 
                           if(!deal) //deal cards to dealer first time only
@@ -727,6 +748,11 @@ class chat_session
 
                       if(read_msg_.ca.stand == true)
                       {
+                          std::string gui = room_.stringOfCards();
+                          char b[gui.size() +1 ];
+                          std::copy(gui.begin(), gui.end(), b);
+                          b[gui.size()] = '\0';
+                          strcpy(read_msg_.ca.g, b);
                           //if setNextHand true, it sets player hand to next hand
                           if(!room_.setNextHand(read_msg_.ca.id))
                           {
@@ -744,7 +770,7 @@ class chat_session
                               turn = -1; //everyone is finished so dealer's turn
                               reveal = true;
                               room_.dealer->deal();
-                              std::string gui = room_.stringOfCards();
+                              gui = room_.stringOfCards();
 
                               char g[gui.size() +1 ];
                               std::copy(gui.begin(), gui.end(), g);
@@ -777,7 +803,6 @@ class chat_session
 		      read_msg_.ca.split_button = room_.canBeSplit(turn);
                       read_msg_.ca.double_button = room_.checkDouble(turn);
                       read_msg_.ca.bet = room_.get_bet(read_msg_.ca.id);
-                      std::cout << "dOUBLE :: " << read_msg_.ca.double_button << std::endl;
                       read_msg_.encode_header(); // save info in msg to be sent to client
                       room_.deliver(read_msg_); // deliver msg to all clients
                       if(reveal)
@@ -896,34 +921,18 @@ int main(int argc, char* argv[])
             servers.emplace_back(io_context, endpoint);
         }
         std::thread t([&io_context](){ io_context.run(); });
-        //double seconds_passed;
-        //double seconds_expire = 20;
         while(true)
         {
             usleep(1000000);//sleep for 1 second to reduce memory consumption
             if(servers.front().numPlayers() >= 1)
             {
-                //start the clock when one player joins
-                //clock_t start = clock();
-                //while(true) 
-                //{
-
                 usleep(10000000);//sleep for 10 seconds
-                //seconds_passed = (clock() - start)/CLOCKS_PER_SEC;
-                //if(seconds_passed > seconds_expire)
-                //{
-
                 std::cout << "Expired" << std::endl;
                 inplay = true;
                 servers.front().start_play();
                 break;
-
-                //}
-                //}
-                //break;
             }
         }
-        //io_context.run();
         t.join();
     }
     catch (std::exception& e)
