@@ -21,15 +21,6 @@ public:
       isFaceUp = false;
   }
 
-  /*
-  void display() 
-  {
-      const char * rankText[] = { " ", "Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King" };
-      const char * suitText[] = { "Spades", "Hearts", "Clubs", "Diamonds" };
-      std::cout << rankText[rank_] << " of " << suitText[suit_] << std::endl;
-  }
-  */
-
   void display() 
   {
      std::cout << rank_ << " of " << suit_ << std::endl;

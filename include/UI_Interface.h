@@ -16,7 +16,6 @@ class UI_Interface : public Gtk::Window
         void doubledown_button_pressed(std::string msg);
         void split_button_pressed();
         void leave_button_pressed();
-        void on_button_clicked();
         void on_new_clicked();
         void set_id(int id);
         void draw();

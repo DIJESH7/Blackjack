@@ -98,7 +98,6 @@ class chat_client
                     std::cout << "Your Player id: "<< id << std::endl;
                     }
                     std::cout << std::endl;
-                    //std::cout << read_msg_.ca.g << std::endl;
                     do_read_body();
                     storeData();
                     gdk_threads_leave();
@@ -227,7 +226,6 @@ class chat_client
                     msg.ca.new_game = true;
                     msg.encode_header();
                     write(msg);
-                    win->add_bet(amount);
                 }
             }
             else
@@ -382,7 +380,6 @@ void Controller::new_game()
     msg.ca.new_game = true;
     msg.encode_header();
     c->write(msg);
-    win->add_bet(amount);
 }
 
 int main(int argc, char* argv[])
@@ -442,7 +439,6 @@ int main(int argc, char* argv[])
 
     std::string name = entry->get_text();
     int amount = bet->get_value();
-    std::cout << name << " " << amount << std::endl;
 
     gdk_threads_leave();
 

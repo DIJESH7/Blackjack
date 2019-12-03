@@ -123,7 +123,7 @@ class chat_participant
 
         bool hasFunds(int bet)
         {
-            int c = credits;
+            double c = credits;
             for(auto h : playerHand)
             {
                 c -= h.get_bet();
@@ -183,8 +183,7 @@ class chat_participant
 
         int id;
         bool play = false;
-        //int credits = 100;
-        int credits = 2;
+        int credits = 100;
     private:
         int currentHand = 0;
         std::vector<Hand> playerHand;
@@ -264,7 +263,6 @@ class chat_room
             handshake.ca.size = 0;
 
 
-            std::cout << inplay << " JJVKN " << checkAllPlay(-1) << std::endl;
             if((inplay && checkAllPlay(-1)) || sizeOfParticipants() > 6)
             {
                 //tell them to wait
@@ -291,8 +289,7 @@ class chat_room
                     d.shuffle();
                     inplay = true;
                     announced = false;
-                    std::cout << "IIII got here " << checkAllPlay(-1) << std::endl;
-                          
+
                     chat_message handshake;
                     handshake.ca.turn = turn;
                     handshake.encode_header();
@@ -315,21 +312,12 @@ class chat_room
 
         void deliver(const chat_message& msg)
         {
-            //recent_msgs_.push_back(msg);
-            //while (recent_msgs_.size() > max_recent_msgs)
-            //    recent_msgs_.pop_front();
-
             for (auto participant: participants_)
                 participant->deliver(msg);
         }
 
-        // TODO deliver msg to specific client
         void deliver2(const chat_message& msg, int recipient_id)
         {
-            //recent_msgs_.push_back(msg);
-            //while (recent_msgs_.size() > max_recent_msgs)
-            //    recent_msgs_.pop_front();
-
             for (auto participant: participants_)
             {
                 if(participant->id == recipient_id)
@@ -400,7 +388,6 @@ class chat_room
             std::string result = "";
             for(auto participant: participants_)
             {
-                //TODO need to add dealer's cards as well
                 result += participant->printHand();
             }
             result += dealer->printHand();
@@ -419,7 +406,6 @@ class chat_room
             }
             for (auto participant : participants_)
             {
-                std::cout << participant->id << " ID: " << participant->play << std::endl;
                 if(!participant->play)
                 {
                     return false;
@@ -593,7 +579,6 @@ class chat_room
                     std::copy(gui.begin(), gui.end(), g);
                     g[gui.size()] = '\0';
                     strcpy(handshake.ca.g, g);
-                    std::cout << "ID: " << handshake.ca.turn << handshake.ca.client_credits << std::endl;
                     handshake.encode_header();
                     participant->deliver(handshake);
                 }
@@ -767,6 +752,11 @@ class chat_session
                     {
                     if (!ec && read_msg_.decode_header()) 
                     {
+                      //somebody pressed new game when the game is still running
+                      //if(inplay && read_msg_.ca.new_game) 
+                      //{
+                      //    read_msg_.ca.play = false;
+                      //}
 
                       if(read_msg_.ca.new_game && reveal)
                       {
@@ -780,6 +770,7 @@ class chat_session
                           announced = false;
                           d.build();
                           d.shuffle();
+                          inplay = true;
                           
                           chat_message handshake;
                           handshake.ca.turn = turn;
@@ -1083,7 +1074,6 @@ int main(int argc, char* argv[])
             if(servers.front().numPlayers() >= 1)
             {
                 usleep(10000000);//sleep for 10 seconds
-                std::cout << "Expired" << std::endl;
                 inplay = true;
                 servers.front().start_play();
                 break;

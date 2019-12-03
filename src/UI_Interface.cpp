@@ -26,6 +26,14 @@ UI_Interface::UI_Interface(Controller* controller)
     menuitem_new->signal_activate().connect([this] { this->on_new_clicked(); });
     filemenu->append(*menuitem_new);
 
+    Gtk::Toolbar *toolbar = Gtk::manage(new Gtk::Toolbar);
+    vbox->add(*toolbar);
+
+    Gtk::ToolButton *new_game_button = Gtk::manage(new Gtk::ToolButton(Gtk::Stock::NEW));
+    new_game_button->set_tooltip_markup("Start a new name, continuing any in progress");
+    new_game_button->signal_clicked().connect(sigc::mem_fun(*this, &UI_Interface::on_new_clicked));
+    toolbar->append(*new_game_button);
+
     Gtk::HBox * h_labels = Gtk::manage(new Gtk::HBox);    
 
     credit_label= Gtk::manage(new Gtk::Label());
@@ -117,11 +125,6 @@ void UI_Interface::show_credit(int credit)
     credit_label->set_label("\t\tYour Credit: " + to_string(credit) + "\t");
 }
 
-void UI_Interface::on_button_clicked()
-{
-
-}
-
 void UI_Interface::on_new_clicked()
 {
     UI_Interface::controller->new_game();
@@ -197,7 +200,6 @@ void UI_Interface::leave_button_pressed()
 
 void UI_Interface::redraw(std::string data, int turn, bool split, bool doubledown, int * results, int size, int credits)
 {
-    std::cout << turn << " Turn " << std::endl;
     if(turn != UI_Interface::pid)
     {
         for(auto button : UI_Interface::buttons)
@@ -226,7 +228,6 @@ void UI_Interface::redraw(std::string data, int turn, bool split, bool doubledow
 
     //only destroy and refresh if there
     //was any update  in the message
-    std::cout << "LEN: " << data.length() << std::endl;
     if(data.length() >= 5) //used 5 just in case of some escaped \0 or \n or ' '
     {
         for (auto c : _container)
@@ -244,7 +245,6 @@ void UI_Interface::redraw(std::string data, int turn, bool split, bool doubledow
         labels.clear();
         ids.clear();
         std::stringstream ss(data);//convert string to sstream
-        std::cout << data << std::endl;
         int id = 0;
         int hid = 0;
 
@@ -297,7 +297,6 @@ void UI_Interface::redraw(std::string data, int turn, bool split, bool doubledow
             else
                 wins += "Game is not finished yet\n";
         }
-        std::cout << wins << std::endl;
         Gtk::MessageDialog* dialog = new Gtk::MessageDialog(*this, "Results", false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
         dialog->set_secondary_text(wins, false);
         dialog->run();
