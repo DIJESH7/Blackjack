@@ -157,6 +157,11 @@ class chat_participant
             return s;
         }
 
+        void clearAllHands()
+        {
+            playerHand.clear();
+        }
+
         int id;
         bool play = false;
         int credits = 100;
@@ -210,6 +215,11 @@ class Dealer : public chat_participant
         int getTotal()
         {
             return playerHand.getTotal();
+        }
+
+        void clearHand()
+        {
+            playerHand.clear();
         }
 
         void deliver(const chat_message& msg) {}
@@ -379,6 +389,13 @@ class chat_room
         void changeActivePlayer(int pturn)
         {
             chat_message handshake;
+            if(sizeOfParticipants() == 0)
+                return;
+
+            while(!idInVector(pturn))
+            {
+                pturn++;
+            }
             handshake.ca.turn = pturn;
             handshake.ca.split_button = canBeSplit(pturn);
             handshake.ca.double_button = checkDouble(pturn);
@@ -596,6 +613,48 @@ class chat_room
             }
         }
 
+        void clearHands()
+        {
+            for(auto participant : participants_)
+            {
+                participant->clearAllHands();
+            }
+            dealer->clearHand();
+        }
+
+        void clearPlay()
+        {
+            for(auto participant : participants_)
+            {
+                participant->play = false;
+            }
+        }
+
+        void set_play(int id)
+        {
+            for(auto participant : participants_)
+            {
+                if(participant->id == id)
+                {
+                    participant->play = true;
+                }
+            }
+        }
+
+        void popDialogs()
+        {
+            for(auto participant : participants_)
+            {
+                if(!(participant->play))
+                {
+                    chat_message handshake;
+                    handshake.ca.popDialog = true;
+                    handshake.encode_header();
+                    participant->deliver(handshake);
+                }
+            }
+        }
+
         Dealer* dealer;
 
     private:
@@ -654,6 +713,27 @@ class chat_session
                     if (!ec && read_msg_.decode_header()) 
                     {
 
+                      if(read_msg_.ca.new_game && reveal)
+                      {
+                          room_.clearHands();
+                          read_msg_.ca.play = true;    
+                          reveal = false;
+                          inplay = false;
+                          room_.clearPlay();
+                          room_.set_play(read_msg_.ca.id);
+                          deal = false;
+                          
+                          chat_message handshake;
+                          handshake.ca.turn = 0;
+                          handshake.encode_header();
+                          room_.deliver(handshake);
+
+                          usleep(10000000);//sleep for 10 seconds
+                          inplay = true;
+                          room_.popDialogs();
+                          room_.changeActivePlayer(1);
+                      }
+
                       if(read_msg_.ca.play && room_.idInVector(read_msg_.ca.id))
                       {
 
@@ -670,9 +750,9 @@ class chat_session
                           std::copy(gui.begin(), gui.end(), g);
                           g[gui.size()] = '\0';
                           strcpy(read_msg_.ca.g, g);
-
                           room_.set_bet(read_msg_.ca.id, read_msg_.ca.bet);
-                          
+                          room_.deliverBets(read_msg_.ca.id);
+                          room_.set_play(read_msg_.ca.id);
                       }
 
                       if(read_msg_.ca.hit == true)
@@ -896,6 +976,7 @@ class chat_server
 };
 
 //----------------------------------------------------------------------
+
 
 int main(int argc, char* argv[])
 { 

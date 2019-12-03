@@ -124,7 +124,7 @@ void UI_Interface::on_button_clicked()
 
 void UI_Interface::on_new_clicked()
 {
-
+    UI_Interface::controller->new_game();
 }
 
 void UI_Interface::set_id(int id)

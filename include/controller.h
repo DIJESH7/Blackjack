@@ -14,5 +14,5 @@ class Controller
         ~Controller();
 
     private:
-
+        bool game_end = false;
 };

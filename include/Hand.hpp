@@ -29,7 +29,7 @@ class Hand
         }
         void clear()
         {
-            //TODO clears hand of cards
+            inHand.clear();
         }
         bool is21()
         {

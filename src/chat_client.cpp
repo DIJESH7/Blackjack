@@ -88,7 +88,6 @@ class chat_client
                     {
                     if (!ec && read_msg_.decode_header())
                     {
-                    //system("clear");
                     gdk_threads_enter();
                     if(!gotId) //runs only first time
                     {
@@ -155,7 +154,11 @@ class chat_client
             std::string data(read_msg_.ca.g);
             std::string bet(read_msg_.ca.updateBet);
             std::cout << read_msg_.ca.g << std::endl;
-            if(read_msg_.ca.update)
+            if(read_msg_.ca.popDialog)
+            {
+                win->on_new_clicked();
+            }
+            else if(read_msg_.ca.update)
             {
                 win->set_bet(bet, read_msg_.ca.id);
 
@@ -210,12 +213,9 @@ void Controller::hit()
 
 void Controller::split()
 {
-    //char line[chat_message::max_body_length + 1];
-    //std::strcpy(line, "garbage");
     chat_message msg;
 
     msg.body_length(0);
-    //std::memcpy(msg.body(), line, msg.body_length());
 
     msg.ca.hit = false;
     msg.ca.split = true;
@@ -228,12 +228,9 @@ void Controller::split()
 
 void Controller::stand()
 {
-    //char line[chat_message::max_body_length + 1];
-    //std::strcpy(line, "garbage");
     chat_message msg;
 
     msg.body_length(0);
-    //std::memcpy(msg.body(), line, msg.body_length());
 
     msg.ca.hit = false;
     msg.ca.stand = true;
@@ -276,19 +273,10 @@ void Controller::new_game()
     
     chat_message msg;
 
-    gdk_threads_enter();
-    Gtk::Dialog * dialog = new Gtk::Dialog("Welcome");
+    //gdk_threads_enter();
+    Gtk::Dialog * dialog = new Gtk::Dialog("Bet?");
+    dialog->add_button("Leave", 0);
     dialog->add_button("Ready", 1);
-
-    Gtk::Label * label = new Gtk::Label("Your Name: ");
-    dialog->get_content_area()->pack_start(*label);
-    label->show();
-
-    Gtk::Entry * entry = new Gtk::Entry{};
-    entry->set_text("Name");
-    entry->set_max_length(50);
-    entry->show();
-    dialog->get_vbox()->pack_start(*entry);
 
     Gtk::Label * label2 = new Gtk::Label("Bet Amount: ");
     dialog->get_content_area()->add(*label2);
@@ -304,28 +292,26 @@ void Controller::new_game()
     bet->show();
 
     dialog->get_content_area()->add(*bet);
-    dialog->run();
+    int r = dialog->run();
     dialog->close();
 
-    std::string name = entry->get_text();
+    if(r != 1) //did not press ready
+    {
+        Controller::leave();
+    }
+
     int amount = bet->get_value();
-    std::cout << name << " " << amount << std::endl;
 
-    gdk_threads_leave();
+    //gdk_threads_leave();
 
-    delete entry;
-    delete label;
+    delete label2;
     delete dialog;
-
-    win->set_name(name);
-    win->show_credit(msg.ca.client_credits);
-
-    Card temp;
 
     //start dealing
     msg.ca.play = true;
     msg.ca.id = c->get_id();
     msg.ca.bet = amount;
+    msg.ca.new_game = true;
     msg.encode_header();
     c->write(msg);
     win->add_bet(amount);
@@ -356,7 +342,7 @@ int main(int argc, char* argv[])
     chat_message msg;
 
     gdk_threads_enter();
-    Gtk::Dialog * dialog = new Gtk::Dialog("Welcome");
+    Gtk::Dialog * dialog = new Gtk::Dialog("WELCOME TO CASINO ROYALE!");
     dialog->add_button("Ready", 1);
 
     Gtk::Label * label = new Gtk::Label("Your Name: ");
@@ -394,12 +380,11 @@ int main(int argc, char* argv[])
 
     delete entry;
     delete label;
+    delete label2;
     delete dialog;
 
     win->set_name(name);
     win->show_credit(msg.ca.client_credits);
-
-    Card temp;
 
     //start dealing
     msg.ca.play = true;

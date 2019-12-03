@@ -45,6 +45,8 @@ class client_action
         bool leave = false;
         bool first_card = false;
         bool second_card = false;
+        bool new_game = false;
+        bool popDialog = false;
         int id = 0;
         int active_hand = 0;
         int handWins[24];
