@@ -274,7 +274,11 @@ void Controller::new_game()
     chat_message msg;
 
     //gdk_threads_enter();
-    Gtk::Dialog * dialog = new Gtk::Dialog("Bet?");
+    std::string title = "Bet?";
+    title += "  (Player#";
+    title += std::to_string(c->get_id());
+    title += + ")";
+    Gtk::Dialog * dialog = new Gtk::Dialog(title); //Title -> Bet? (Player#1)
     dialog->add_button("Leave", 0);
     dialog->add_button("Ready", 1);
 

@@ -42,6 +42,7 @@ int turn = 0;
 
 bool reveal              = false;
 bool deal                = false;
+bool announced           = false;
 bool dealer_initialized  = false;
 
 //------------------------------------------------------------------------------------------------
@@ -82,10 +83,6 @@ class chat_participant
             return playerHand[currentHand];
         }
 
-        //TODO check why it works only sometimes
-        //FIXME hand.hpp only checks if ace in hand, 
-        //if yes -10, and sets ace.value = 1,
-        //but this cannot work for reference...
         bool checkBust()
         {
             return getCurrentHand().isBust();
@@ -103,7 +100,6 @@ class chat_participant
                 return false;
         }
 
-        //TODO test if its working
         void split()
         {
             if(getCurrentHand().canSplit())
@@ -241,10 +237,12 @@ class chat_room
         void join(chat_participant_ptr participant) 
         {
             participant->id = ++playercount;
+            handshake.ca.size = 0;
 
-            if(inplay || playercount > 6)
+
+            std::cout << inplay << " JJVKN " << checkAllPlay(-1) << std::endl;
+            if((inplay && checkAllPlay(-1)) || sizeOfParticipants() > 6)
             {
-                std::cout << participant->id << std::endl;
                 //tell them to wait
                 strcpy(handshake.ca.g, "Please wait for the game to finish\n");
                 handshake.ca.id = participant->id;
@@ -254,16 +252,35 @@ class chat_room
             }
             else
             {
-                participants_.insert(participant);
+
+                //if player joins after some game ends
+                //dealer has revealed the cards .. not the first game
+                if(checkAllPlay(-1) && !inplay && reveal) 
+                {
+                    turn = 0;
+                    clearHands();
+                    reveal = false;
+                    clearPlay();
+                    set_play(participant->id);
+                    deal = false;
+                    d.build();
+                    d.shuffle();
+                    inplay = true;
+                    announced = false;
+                    std::cout << "IIII got here " << checkAllPlay(-1) << std::endl;
+                          
+                    chat_message handshake;
+                    handshake.ca.turn = turn;
+                    handshake.encode_header();
+                    deliver(handshake);
+                    popDialogs(participant->id);
+                    changeActivePlayer(1);
+                }
                 handshake.ca.id = participant->id;
-                handshake.ca.turn = 0;
+                participants_.insert(participant);
+                handshake.ca.turn = turn;
                 handshake.encode_header();
                 participant->deliver(handshake);
-                for (auto msg: recent_msgs_)
-                {
-                    msg.ca.id = participant->id;
-                    participant->deliver(msg);
-                }
             }
         }
 
@@ -274,9 +291,9 @@ class chat_room
 
         void deliver(const chat_message& msg)
         {
-            recent_msgs_.push_back(msg);
-            while (recent_msgs_.size() > max_recent_msgs)
-                recent_msgs_.pop_front();
+            //recent_msgs_.push_back(msg);
+            //while (recent_msgs_.size() > max_recent_msgs)
+            //    recent_msgs_.pop_front();
 
             for (auto participant: participants_)
                 participant->deliver(msg);
@@ -285,9 +302,9 @@ class chat_room
         // TODO deliver msg to specific client
         void deliver2(const chat_message& msg, int recipient_id)
         {
-            recent_msgs_.push_back(msg);
-            while (recent_msgs_.size() > max_recent_msgs)
-                recent_msgs_.pop_front();
+            //recent_msgs_.push_back(msg);
+            //while (recent_msgs_.size() > max_recent_msgs)
+            //    recent_msgs_.pop_front();
 
             for (auto participant: participants_)
             {
@@ -378,6 +395,7 @@ class chat_room
             }
             for (auto participant : participants_)
             {
+                std::cout << participant->id << " ID: " << participant->play << std::endl;
                 if(!participant->play)
                 {
                     return false;
@@ -641,11 +659,11 @@ class chat_room
             }
         }
 
-        void popDialogs()
+        void popDialogs(int id = -1) //id is passed in optionally
         {
             for(auto participant : participants_)
             {
-                if(!(participant->play))
+                if(!(participant->play) && (participant->id != id))
                 {
                     chat_message handshake;
                     handshake.ca.popDialog = true;
@@ -715,21 +733,21 @@ class chat_session
 
                       if(read_msg_.ca.new_game && reveal)
                       {
+                          turn = 0;
                           room_.clearHands();
                           read_msg_.ca.play = true;    
                           reveal = false;
-                          inplay = false;
                           room_.clearPlay();
                           room_.set_play(read_msg_.ca.id);
                           deal = false;
+                          announced = false;
+                          d.build();
+                          d.shuffle();
                           
                           chat_message handshake;
-                          handshake.ca.turn = 0;
+                          handshake.ca.turn = turn;
                           handshake.encode_header();
                           room_.deliver(handshake);
-
-                          usleep(10000000);//sleep for 10 seconds
-                          inplay = true;
                           room_.popDialogs();
                           room_.changeActivePlayer(1);
                       }
@@ -885,11 +903,13 @@ class chat_session
                       read_msg_.ca.bet = room_.get_bet(read_msg_.ca.id);
                       read_msg_.encode_header(); // save info in msg to be sent to client
                       room_.deliver(read_msg_); // deliver msg to all clients
-                      if(reveal)
+                      if(reveal && !announced)
                       {
                           usleep(500000); //sleep for half second
                                            //give user chance to see the cards
                           room_.announceResults(-1);
+                          announced = true;
+                          inplay = false;
                       }
 
                       //room_.deliver(read_msg_, id); // can send to specific client
