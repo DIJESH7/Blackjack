@@ -31,14 +31,25 @@ class Hand
         {
             inHand.clear();
         }
-        bool is21()
+        bool isBlackJack()
         {
-            int total = 0;
-            for (auto it = inHand.begin(); it != inHand.end(); ++it) 
+            if(inHand.size() == 2)
             {
-                total = total + it->value;
+                bool jack = false;
+                for(auto c : inHand)
+                {
+                    if(c.getRank() == 'J')
+                    {
+                        jack = true;
+                        break;
+                    }
+                }
+                if(jack && getTotal() == 21)
+                {
+                    return true;
+                }
             }
-            return total==21;
+            return false;
         }
         int getTotal()
         {

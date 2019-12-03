@@ -167,6 +167,69 @@ class chat_client
             {
                 win->doubledown_button_pressed("You cannot wager more than your original bet");
             }
+            else if(read_msg_.ca.error == 2 || read_msg_.ca.error == 3)
+            {
+
+                chat_message msg;
+
+                std::string title = "Bet?";
+                title += "  (Player#";
+                title += std::to_string(get_id());
+                title += + ")";
+                Gtk::Dialog * dialog = new Gtk::Dialog(title); //Title -> Bet? (Player#1)
+                dialog->add_button("Leave", 0);
+                if(read_msg_.ca.error == 3)
+                {
+                    dialog->add_button("Ready", 1);
+                }
+                else if(read_msg_.ca.error == 2)
+                {
+                    dialog->add_button("OK", 1);
+                }
+                Gtk::Label * label2 = new Gtk::Label("You Do not have Enough Credits\n\t\t\tTry Again ");
+                dialog->get_content_area()->add(*label2);
+                label2->show();
+
+                Glib::RefPtr<Gtk::Adjustment> m_adjustment_day(Gtk::Adjustment::create(1.0, 1.0, 5.0, 1.0, 5.0, 0.0));
+                Gtk::SpinButton * bet = new Gtk::SpinButton(m_adjustment_day);
+                bet->set_digits(0);
+                bet->set_numeric(true);
+                bet->set_wrap();
+                bet->set_value(2);
+                bet->set_snap_to_ticks();
+                bet->show();
+                
+                if(read_msg_.ca.error == 3)
+                {
+                    dialog->get_content_area()->add(*bet);
+                }
+                int r = dialog->run();
+                dialog->close();
+
+                if(r != 1) //did not press ready
+                {
+                    win->leave_button_pressed();
+                }
+
+                int amount = bet->get_value();
+
+                //gdk_threads_leave();
+
+                delete label2;
+                delete dialog;
+                delete bet;
+
+                if(read_msg_.ca.error == 3)
+                {
+                    msg.ca.play = true;
+                    msg.ca.id = get_id();
+                    msg.ca.bet = amount;
+                    msg.ca.new_game = true;
+                    msg.encode_header();
+                    write(msg);
+                    win->add_bet(amount);
+                }
+            }
             else
             {
                 win->redraw(data, read_msg_.ca.turn, read_msg_.ca.split_button, read_msg_.ca.double_button, read_msg_.ca.handWins, read_msg_.ca.size, read_msg_.ca.client_credits);
@@ -270,7 +333,7 @@ void Controller::leave()
 
 void Controller::new_game()
 {
-    
+
     chat_message msg;
 
     //gdk_threads_enter();
@@ -309,6 +372,7 @@ void Controller::new_game()
     //gdk_threads_leave();
 
     delete label2;
+    delete bet;
     delete dialog;
 
     //start dealing
@@ -385,6 +449,7 @@ int main(int argc, char* argv[])
     delete entry;
     delete label;
     delete label2;
+    delete bet;
     delete dialog;
 
     win->set_name(name);

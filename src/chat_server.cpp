@@ -100,12 +100,15 @@ class chat_participant
                 return false;
         }
 
-        void split()
+        int split()
         {
             if(getCurrentHand().canSplit())
             {
                 Hand h;
                 h.set_bet(getCurrentHand().get_bet());
+                if(!hasFunds(getCurrentHand().get_bet()))
+                    return -1;
+
                 playerHand.insert(playerHand.begin()+currentHand+1, h);
                 Card temp;
                 temp = d.getCard();
@@ -115,6 +118,21 @@ class chat_participant
                 playerHand[currentHand+1].addCard(c);
                 playerHand[currentHand+1].addCard(temp);
             }
+            return 0;
+        }
+
+        bool hasFunds(int bet)
+        {
+            int c = credits;
+            for(auto h : playerHand)
+            {
+                c -= h.get_bet();
+            }
+            if(c < bet)
+            {
+                return false;
+            }
+            return true;
         }
 
         bool checkSplit()
@@ -131,6 +149,11 @@ class chat_participant
             }
             return playerHand[idx].getTotal();
 
+        }
+
+        bool isBlackJackHand(int idx)
+        {
+            return playerHand[idx].isBlackJack();
         }
 
         int getHandBets(int idx)
@@ -160,7 +183,8 @@ class chat_participant
 
         int id;
         bool play = false;
-        int credits = 100;
+        //int credits = 100;
+        int credits = 2;
     private:
         int currentHand = 0;
         std::vector<Hand> playerHand;
@@ -463,15 +487,16 @@ class chat_room
             return false;
         }
 
-        void splitHand(int id)
+        int splitHand(int id)
         {
             for (auto participant : participants_)
             {
                 if(participant->id == id)
                 {
-                    participant->split();
+                    return participant->split();
                 }
             }
+            return 0;
         }
 
 	bool canBeSplit(int id)
@@ -524,6 +549,14 @@ class chat_room
                             participant->credits -= participant->getHandBets(i);
                             handshake.ca.client_credits = participant->credits;
                         }
+                        //player Hand is BlackJack
+                        else if(participant->isBlackJackHand(i))
+                        {
+                            v.push_back(1);
+                            double amount = participant->getHandBets(i);
+                            amount = (amount*3)/2;
+                            handshake.ca.client_credits += amount; 
+                        }
                         //dealer busts
                         else if(target > 21)
                         { 
@@ -569,16 +602,20 @@ class chat_room
         
         }
 
-        void set_bet(int id, int bet)
+        int set_bet(int id, int bet)
         {
-            std::cout << "BET: " << bet << std::endl;
             for(auto participant : participants_)
             {
                 if(participant->id == id)
                 {
+                    if(!(participant->hasFunds(bet)))
+                    {
+                        return -1;
+                    }
                     participant->getCurrentHand().set_bet(bet);
                 }
             }
+            return 0;
         }
 
         int get_bet(int id)
@@ -623,7 +660,7 @@ class chat_room
                 {
                     chat_message msg;
                     msg.ca.id = id;
-                    msg.ca.error = 1;
+                    msg.ca.error = code;
                     msg.encode_header();
                     deliver2(msg, id);
                     return;
@@ -755,22 +792,28 @@ class chat_session
                       if(read_msg_.ca.play && room_.idInVector(read_msg_.ca.id))
                       {
 
-                          if(!deal) //deal cards to dealer first time only
+                          if(room_.set_bet(read_msg_.ca.id, read_msg_.ca.bet) == -1)
                           {
-                            room_.giveCard(0);
-                            room_.giveCard(0);
-                            deal = true;
+                            room_.deliverErr(read_msg_.ca.id, 3);
                           }
-                          room_.giveCard(read_msg_.ca.id);
-                          room_.giveCard(read_msg_.ca.id);
-                          std::string gui = room_.stringOfCards();
-                          char g[gui.size() +1 ];
-                          std::copy(gui.begin(), gui.end(), g);
-                          g[gui.size()] = '\0';
-                          strcpy(read_msg_.ca.g, g);
-                          room_.set_bet(read_msg_.ca.id, read_msg_.ca.bet);
-                          room_.deliverBets(read_msg_.ca.id);
-                          room_.set_play(read_msg_.ca.id);
+                          else
+                          {
+                            if(!deal) //deal cards to dealer first time only
+                            {
+                              room_.giveCard(0);
+                              room_.giveCard(0);
+                              deal = true;
+                            }
+                            room_.giveCard(read_msg_.ca.id);
+                            room_.giveCard(read_msg_.ca.id);
+                            std::string gui = room_.stringOfCards();
+                            char g[gui.size() +1 ];
+                            std::copy(gui.begin(), gui.end(), g);
+                            g[gui.size()] = '\0';
+                            strcpy(read_msg_.ca.g, g);
+                            room_.deliverBets(read_msg_.ca.id);
+                            room_.set_play(read_msg_.ca.id);
+                          }
                       }
 
                       if(read_msg_.ca.hit == true)
@@ -788,18 +831,24 @@ class chat_session
                       }
                       else if(read_msg_.ca.split == true)
                       {
-                          room_.splitHand(read_msg_.ca.id);
-                          std::string gui = room_.stringOfCards();
-                          bool busted = room_.check_points(read_msg_.ca.id);
+                          if(room_.splitHand(read_msg_.ca.id) == -1)
+                          {
+                            room_.deliverErr(read_msg_.ca.id, 2);
+                          }
+                          else
+                          {
+                            std::string gui = room_.stringOfCards();
+                            bool busted = room_.check_points(read_msg_.ca.id);
 
-                          char g[gui.size() +1 ];
-                          std::copy(gui.begin(), gui.end(), g);
-                          g[gui.size()] = '\0';
-                          strcpy(read_msg_.ca.g, g);
-                          if(busted)
-                            read_msg_.ca.stand = true;
-                          
-                          room_.deliverBets(read_msg_.ca.id);
+                            char g[gui.size() +1 ];
+                            std::copy(gui.begin(), gui.end(), g);
+                            g[gui.size()] = '\0';
+                            strcpy(read_msg_.ca.g, g);
+                            if(busted)
+                              read_msg_.ca.stand = true;
+                            
+                            room_.deliverBets(read_msg_.ca.id);
+                          }
                       }
                       else if(read_msg_.ca.doubledown)
                       {
@@ -807,15 +856,21 @@ class chat_session
                             room_.deliverErr(read_msg_.ca.id, 1);
                           else
                           {
-                            room_.set_bet(read_msg_.ca.id, room_.get_bet(read_msg_.ca.id) + read_msg_.ca.bet);  
-                            room_.giveCard(read_msg_.ca.id);
-                            std::string gui = room_.stringOfCards();
-                            char g[gui.size() +1 ];
-                            std::copy(gui.begin(), gui.end(), g);
-                            g[gui.size()] = '\0';
-                            strcpy(read_msg_.ca.g, g);
-                            read_msg_.ca.stand = true;
-                            room_.deliverBets(read_msg_.ca.id);
+                            if(room_.set_bet(read_msg_.ca.id, room_.get_bet(read_msg_.ca.id) + read_msg_.ca.bet) == -1)
+                            {
+                                room_.deliverErr(read_msg_.ca.id, 2);//error code for not enough money
+                            }
+                            else
+                            {
+                                room_.giveCard(read_msg_.ca.id);
+                                std::string gui = room_.stringOfCards();
+                                char g[gui.size() +1 ];
+                                std::copy(gui.begin(), gui.end(), g);
+                                g[gui.size()] = '\0';
+                                strcpy(read_msg_.ca.g, g);
+                                read_msg_.ca.stand = true;
+                                room_.deliverBets(read_msg_.ca.id);
+                            }
                           }
                           
                       }
