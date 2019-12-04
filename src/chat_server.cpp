@@ -753,10 +753,11 @@ class chat_session
                     if (!ec && read_msg_.decode_header()) 
                     {
                       //somebody pressed new game when the game is still running
-                      //if(inplay && read_msg_.ca.new_game) 
-                      //{
-                      //    read_msg_.ca.play = false;
-                      //}
+                      //TODO
+                      if(inplay && read_msg_.ca.new_game && room_.checkAllPlay(-1)) 
+                      {
+                          read_msg_.ca.play = false;
+                      }
 
                       if(read_msg_.ca.new_game && reveal)
                       {
