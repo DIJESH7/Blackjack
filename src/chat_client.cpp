@@ -148,6 +148,7 @@ class chat_client
                     });
         }
 
+        //calls win appropriate method to update the GUI
         void storeData()
         {
             std::string data(read_msg_.ca.g);
@@ -162,10 +163,12 @@ class chat_client
                 win->set_bet(bet, read_msg_.ca.id);
 
             }
+            //double downed more than original bet
             else if(read_msg_.ca.error == 1)
             {
                 win->doubledown_button_pressed("You cannot wager more than your original bet");
             }
+            //Not enough money. 2->When split or double down, 3->When starting new game
             else if(read_msg_.ca.error == 2 || read_msg_.ca.error == 3)
             {
 
@@ -212,7 +215,6 @@ class chat_client
 
                 int amount = bet->get_value();
 
-                //gdk_threads_leave();
 
                 delete label2;
                 delete dialog;
@@ -246,7 +248,8 @@ class chat_client
 
 chat_client* c;
 
-
+//Controller has methods to pass appropriate chat_message to server
+//indicating hit/stand/play/new_game/double_down/split/leave
 Controller::Controller()
 {
 
@@ -334,7 +337,6 @@ void Controller::new_game()
 
     chat_message msg;
 
-    //gdk_threads_enter();
     std::string title = "Bet?";
     title += "  (Player#";
     title += std::to_string(c->get_id());
@@ -347,6 +349,8 @@ void Controller::new_game()
     dialog->get_content_area()->add(*label2);
     label2->show();
 
+    //With spin button, user cannot enter invalid input other than betting more than his credits
+    //which is will checked in server
     Glib::RefPtr<Gtk::Adjustment> m_adjustment_day(Gtk::Adjustment::create(1.0, 1.0, 5.0, 1.0, 5.0, 0.0));
     Gtk::SpinButton * bet = new Gtk::SpinButton(m_adjustment_day);
     bet->set_digits(0);
@@ -366,8 +370,6 @@ void Controller::new_game()
     }
 
     int amount = bet->get_value();
-
-    //gdk_threads_leave();
 
     delete label2;
     delete bet;

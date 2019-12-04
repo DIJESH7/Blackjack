@@ -166,6 +166,7 @@ class chat_participant
             return playerHand[idx].get_bet();
         }
 
+        //pass all bets of all hands as string
         std::string getAllBets()
         {
             std::string s = "";
@@ -191,7 +192,11 @@ class chat_participant
 
 };
 
-class Dealer : public chat_participant
+//dealer class inherits from participant
+//has different printHand -> to not reveal cards early
+//only has one hand instead of vector
+//deals itself with strict rules /hit if < 17/else stand
+//class Dealer : public chat_participant
 {
     public:
         Dealer() {}
@@ -316,6 +321,7 @@ class chat_room
                 participant->deliver(msg);
         }
 
+        //deliver to particular client
         void deliver2(const chat_message& msg, int recipient_id)
         {
             for (auto participant: participants_)
@@ -332,7 +338,8 @@ class chat_room
             return size;
         }
 
-        void giveCard(int pid) // for initial dealing
+        //hits
+        void giveCard(int pid) 
         {
             if(pid == -1)
             {
@@ -368,6 +375,7 @@ class chat_room
             }
         }
 
+        //check if the player busted
         bool check_points(int id)
         {
             for (auto participant : participants_)
@@ -395,6 +403,7 @@ class chat_room
             return result;
         }
 
+        //check if everybody is ready /they finished the initial dialog
         bool checkAllPlay(int id)
         {
             for (auto participant : participants_)
@@ -414,6 +423,7 @@ class chat_room
             return true;
         }
 
+        //change turn to first player //starts the game
         void changeActivePlayer(int pturn)
         {
             chat_message handshake;
@@ -435,6 +445,7 @@ class chat_room
             }
         }
 
+        //there is a player with the id in vector
         bool idInVector(int id)
         {
             for (auto participant : participants_)
@@ -447,6 +458,7 @@ class chat_room
             return false;
         }
 
+        //get id of last player
         int getLastId()
         {
             int i = 0;
@@ -461,6 +473,7 @@ class chat_room
             return -1;
         }
 
+        //sets player's current hand to next hand, returns false if player does not have next hand
         bool setNextHand(int id)
         {
             for(auto participant : participants_)
@@ -473,6 +486,7 @@ class chat_room
             return false;
         }
 
+        //split the hand
         int splitHand(int id)
         {
             for (auto participant : participants_)
@@ -485,6 +499,7 @@ class chat_room
             return 0;
         }
 
+        //check if hand can be split
 	bool canBeSplit(int id)
 	{
             for (auto participant : participants_)
@@ -497,6 +512,7 @@ class chat_room
 	    return false;
 	}
 
+        //check if hand can be double
         bool checkDouble(int id)
         {
             for(auto participant : participants_)
@@ -509,6 +525,10 @@ class chat_room
             return false;
         }
 
+        //announce the results
+        //writes message to individual player such that each client
+        //decode that results are distributed 
+        //also adds to subtracts client credits
         void announceResults(int id)
         {
             int target = dealer->getTotal();
@@ -587,6 +607,7 @@ class chat_room
         
         }
 
+        //set bet for current hand of player with id
         int set_bet(int id, int bet)
         {
             for(auto participant : participants_)
@@ -603,6 +624,7 @@ class chat_room
             return 0;
         }
 
+        //get bet of current hand of player with id
         int get_bet(int id)
         {
             for(auto participant : participants_)
@@ -615,6 +637,7 @@ class chat_room
             return -1;
         }
 
+        //like announce results, distributes individual message to players
         void deliverBets(int id)
         {
             for(auto participant : participants_)
@@ -637,6 +660,11 @@ class chat_room
             return;
         }
 
+        //like announce results, distributes individual message to players
+        //telling what error they have made
+        //code 1 = cannot wager more than original bet in double down
+        //2 = not enough credits for split or double down
+        //3 = not enough credits for new game
         void deliverErr(int id, int code)
         {
             for(auto participant : participants_)
@@ -662,6 +690,7 @@ class chat_room
             dealer->clearHand();
         }
 
+        //every player is not ready to play
         void clearPlay()
         {
             for(auto participant : participants_)
@@ -681,6 +710,8 @@ class chat_room
             }
         }
 
+        //for players who havent requested new game yet
+        //pops dialog to enter their bet or leave match
         void popDialogs(int id = -1) //id is passed in optionally
         {
             for(auto participant : participants_)
