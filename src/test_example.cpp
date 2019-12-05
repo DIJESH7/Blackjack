@@ -3,8 +3,8 @@
 #include <boost/test/unit_test.hpp>
 
 // header defining all the code to be tested
-#include "include/Hand.hpp"
-#include "include/Card.hpp"
+#include "../include/Hand.hpp"
+#include "../include/Card.hpp"
 
 using namespace boost;
 using namespace boost::unit_test;

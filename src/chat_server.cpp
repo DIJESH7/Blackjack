@@ -144,8 +144,6 @@ class chat_participant
         {
             int size = playerHand.size();
             if(idx >= size )
-            int size = playerHand.size();
-            if(idx >= size )
             {
                 return -1;
             }
@@ -562,7 +560,7 @@ class chat_room
                         {
                             v.push_back(1);
                             double amount = participant->getHandBets(i);
-                            amount = (amount*3)/2;
+                            amount = (amount*3)/2.0;
                             handshake.ca.client_credits += amount; 
                         }
                         //dealer busts
@@ -1118,3 +1116,5 @@ int main(int argc, char* argv[])
     catch (std::exception& e)
     {
         std::cerr << "Exception: " << e.what() << "\n";
+    }
+}
