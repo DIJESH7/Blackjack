@@ -2,7 +2,7 @@ CXXFLAGS = --std=c++11
 GTKFLAGS = $(shell pkg-config gtkmm-3.0 --cflags --libs)
 CPPFLAGS = -I./asio-1.13.0/include
 
-TARGETS = server client 
+TARGETS = server client test_example
 
 all:$(TARGETS) 
 
@@ -17,15 +17,11 @@ chat_client.o : src/chat_client.cpp include/chat_message.hpp include/controller.
 
 UI_Interface.o : src/UI_Interface.cpp include/*.h
 	$(CXX) $(CXXFLAGS) -c src/UI_Interface.cpp $(GTKFLAGS) -g -Wall
-
-#controller.o : src/controller.cpp include/*.h
-#	$(CXX) $(CXXFLAGS) -c src/controller.cpp $(GTKFLAGS) -g -Wall
-
-#BJD.o : src/BJD.cpp include/*.h
-#	$(CXX) $(CXXFLAGS) -c src/BJD.cpp $(GTKFLAGS) -g -Wall
-
-#BJP.o : src/BJP.cpp include/*.h
-#	$(CXX) $(CXXFLAGS) -c src/BJP.cpp $(GTKFLAGS) -g -Wall
+	
+	
+test_example : test_example.cpp include/Hand.hpp include/Card.hpp
+	${CXX} ${CXXFLAGS} ${CPPFLAGS} -o $@ $< \
+            -lboost_unit_test_framework
 
 clean:
 	-rm -f *.o *.gch *~ $(TARGETS)
