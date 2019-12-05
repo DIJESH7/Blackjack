@@ -3,7 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-//#include <deque>
+#include <deque>
 #include "Card.hpp"
 
 using namespace std;
@@ -16,8 +16,11 @@ public:
 
     };
     virtual ~Deck(){};
- 
-    void build() // direct approach to building deck
+    
+   /**
+   * Populates the vector of cards with six decks.
+   */
+    void build() 
     {
         for(int d = 0 ; d < 6 ; d++)
         {
@@ -133,6 +136,10 @@ public:
         }
     }
 
+   /**
+   * Calls the display function of each card
+   * in the card vector.
+   */
     void displayDeck()
     {
       for (auto it : cards_)
@@ -141,6 +148,10 @@ public:
         c.display();
       }
     }
+    
+   /**
+   * Shuffles the deck's vector of cards randomly.
+   */
     void shuffle()
     {
         srand((unsigned) time(0));
@@ -149,16 +160,27 @@ public:
             std::swap( cards_[i] , cards_[ rand()%311] );
         }
     }
+    
+   /**
+   * Returns the number of cards left in deck.
+   */
     int cardsLeft()
     {
       return cards_.size();
     }
+    
+   /**
+   * Returns ture if the deck is empty.
+   */
     bool deck_is_empty()
     {
         return cards_.empty();
     }
-    //for when deck runs out of cards
-    // for later
+    
+   /**
+   * Calls the deck object's build function
+   * if the vector of cards becomes empty
+   */
     void reset()
     {
         //clear the vector
@@ -168,7 +190,10 @@ public:
         }
     }
     
-    //get card and return it
+   /**
+   * Returns a card from the deck
+   * and removes that card from the deck.
+   */
     Card getCard()
     {
         Card temp = cards_.front();
