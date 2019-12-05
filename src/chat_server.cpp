@@ -144,6 +144,8 @@ class chat_participant
         {
             int size = playerHand.size();
             if(idx >= size )
+            int size = playerHand.size();
+            if(idx >= size )
             {
                 return -1;
             }
@@ -184,7 +186,7 @@ class chat_participant
 
         int id;
         bool play = false;
-        int credits = 100;
+        double credits = 100;
     private:
         int currentHand = 0;
         std::vector<Hand> playerHand;
@@ -196,7 +198,7 @@ class chat_participant
 //has different printHand -> to not reveal cards early
 //only has one hand instead of vector
 //deals itself with strict rules /hit if < 17/else stand
-//class Dealer : public chat_participant
+class Dealer : public chat_participant
 {
     public:
         Dealer() {}
@@ -1116,6 +1118,3 @@ int main(int argc, char* argv[])
     catch (std::exception& e)
     {
         std::cerr << "Exception: " << e.what() << "\n";
-    }
-    return 0;
-}

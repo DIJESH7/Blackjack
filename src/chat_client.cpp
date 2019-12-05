@@ -148,7 +148,7 @@ class chat_client
                     });
         }
 
-        //calls win appropriate method to update the GUI
+        //calls UI_Inteface appropriate method to update the GUI
         void storeData()
         {
             std::string data(read_msg_.ca.g);
@@ -309,7 +309,7 @@ void Controller::doubledown(int bet)
     chat_message msg;
     msg.body_length(0);
     msg.ca.id = c->get_id();
-    msg.ca.doubledown = true;
+    msg.ca.doubledown =/true;
     msg.ca.bet = bet;
     msg.encode_header();
     c->write(msg);

@@ -157,6 +157,6 @@ class Hand
         int handValue;
         int count;
         bool playing;
-        int bet;
+        int bet = 0;
 };
 
