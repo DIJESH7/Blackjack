@@ -196,7 +196,7 @@ class chat_participant
 //has different printHand -> to not reveal cards early
 //only has one hand instead of vector
 //deals itself with strict rules /hit if < 17/else stand
-//class Dealer : public chat_participant
+class Dealer : public chat_participant
 {
     public:
         Dealer() {}
