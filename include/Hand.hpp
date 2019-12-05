@@ -27,10 +27,18 @@ class Hand
             count++;
             aceInHand();
         }
+    
+        /**
+        * Clears the inHand vector.
+        */
         void clear()
         {
             inHand.clear();
         }
+    
+        /**
+        * Returns true if initial hand is blackjack
+        */
         bool isBlackJack()
         {
             if(inHand.size() == 2)
@@ -51,6 +59,10 @@ class Hand
             }
             return false;
         }
+    
+        /**
+        * Returns total value of cards in hand
+        */
         int getTotal()
         {
             int total = 0;
@@ -60,6 +72,10 @@ class Hand
             }
             return total;
         }
+    
+        /**
+        * Returns true if player's hand value is more than 21
+        */
         bool isBust()
         {
             aceInHand();
@@ -70,18 +86,20 @@ class Hand
             //Returns true if all possible scores are greater than 21
             return false;
         }
-        Card removeCard(Card C)
-        {
-            // TODO
-            return C;
-        }
+    
+        /**
+        * Checks if there is an ace in hand
+        */
         void checkHand()
         {
             aceInHand();
-            //if ( handValue > 21 && aceInHand() ) 
-                //handValue -= 10; // whole hand value
         }
-        // if there is an Ace in the Hand, value will change from 11 to 1 for Ace
+    
+        /**
+        * Changes Ace's value from 11 to 1 
+        * if the Ace's 11 value causes hand to
+        * go over 21.
+        */
         void aceInHand()
         {
             int size = inHand.size();
@@ -95,6 +113,10 @@ class Hand
                 }
             }
         }
+    
+        /**
+        * Calls the display function of each card in the hand.
+        */
         void printHand()
         {
             for(auto card: inHand)
@@ -103,6 +125,10 @@ class Hand
             }
         }
 
+        /**
+        * Returns the player's cards in hand
+        * in the form of a string.
+        */
         std::string printAllHand(int id)
         {
             std::string result;
@@ -112,11 +138,14 @@ class Hand
 
             for(auto card: inHand)
             {   
-                result += card.printCard(); // utsav caught this
+                result += card.printCard();
             }
             return result;
         }
 
+        /**
+        * Returns true if the player's hand is able to split.
+        */
         bool canSplit()
         {
             //return true; //this line for testing purposes
@@ -129,6 +158,11 @@ class Hand
             return true;
         }
 
+        /**
+        * Removes a card from the hand
+        * and returns it
+        * when the player wants to split.
+        */
         Card split()
         {
             Card c = inHand[1];
@@ -136,16 +170,26 @@ class Hand
             return c;
         }
 
+        /**
+        * Returns the hand's bet.
+        */
         int get_bet()
         {
             return bet;
         }
 
+        /**
+        * Sets the bet of the hand.
+        */
         void set_bet(int bet_)
         {
             bet = bet_;
         }
 
+        /**
+        * Returns true if the player's hand
+        * is able to double.
+        */
         bool can_double()
         {
             if(inHand.size() == 2)
