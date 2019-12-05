@@ -19,7 +19,7 @@ UI_Interface.o : src/UI_Interface.cpp include/*.h
 	$(CXX) $(CXXFLAGS) -c src/UI_Interface.cpp $(GTKFLAGS) -g -Wall
 	
 	
-test_example : src/test_example.cpp include/Hand.hpp include/Card.hpp
+test_example : test_example.cpp include/Hand.hpp include/Card.hpp
 	${CXX} ${CXXFLAGS} ${CPPFLAGS} -o $@ $< \
             -lboost_unit_test_framework
 
