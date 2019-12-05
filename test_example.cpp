@@ -5,7 +5,6 @@
 // header defining all the code to be tested
 #include "include/Hand.hpp"
 #include "include/Deck.hpp"
-//#include "include/Card.hpp"
 
 using namespace boost;
 using namespace boost::unit_test;
@@ -39,14 +38,14 @@ struct TestFixtureDeck
 BOOST_FIXTURE_TEST_CASE(lessthan21, TestFixtureHand)
 {
     // just contains 1 card
-    BOOST_CHECK( ! hand.is21 ());
+    BOOST_CHECK(  hand.getTotal ());
    
     Card CC;
     // add another one  
     CC.setInfo(10, 'Q', 'C');
     Hand hand; 
     hand.addCard (CC);
-    BOOST_CHECK( ! hand.is21 ()); 
+    BOOST_CHECK(  hand.getTotal ()); 
 }
 
 BOOST_FIXTURE_TEST_CASE(over21, TestFixtureHand)
@@ -55,7 +54,7 @@ BOOST_FIXTURE_TEST_CASE(over21, TestFixtureHand)
     CC.setInfo(10, 'J', 'D');
     hand.addCard (CC);
     hand.addCard (CC);
-    BOOST_CHECK( ! hand.is21 ());
+    BOOST_CHECK(  hand.getTotal ());
 }
 
 BOOST_FIXTURE_TEST_CASE(equal21, TestFixtureHand)
@@ -63,7 +62,7 @@ BOOST_FIXTURE_TEST_CASE(equal21, TestFixtureHand)
     Card CC;
     CC.setInfo(11, 'A', 'H');
     hand.addCard (CC);
-    BOOST_CHECK(  hand.is21 ());
+    BOOST_CHECK(  hand.getTotal ());
 }
 
 BOOST_FIXTURE_TEST_CASE(numOfCards, TestFixtureDeck)
