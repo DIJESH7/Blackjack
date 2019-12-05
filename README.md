@@ -1,8 +1,10 @@
 # BlackJackGame
 Group project developing a blackjack server-client game using Boost::asio and GTK gui.
 
-run ./server 9000 in one terminal
-run ./client 127.0.0.1 9000 other terminal(s)
+# HOW TO RUN
+1. run `./server 9000` in one terminal
+
+2. run `./client 127.0.0.1 9000` other terminal(s)
 
 Enter name and bet amount for client dialog- gui would pop up.
 There 10 seconds after first client joins, for other clients to join
