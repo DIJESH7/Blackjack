@@ -22,9 +22,9 @@ public:
    */
     void build() 
     {
+        cards_.clear();
         for(int d = 0 ; d < 6 ; d++)
         {
-            cards_.clear();
             Card result;
             
             result.setInfo(11, 'A','S');
